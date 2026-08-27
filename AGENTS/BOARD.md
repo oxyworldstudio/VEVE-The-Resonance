@@ -14,10 +14,10 @@
 
 | ID | Agente | Task | Commit | Esito |
 |----|--------|------|--------|-------|
-| T-110 | AGENT 08 | Distruzione persistente: Destructible + IBallisticTarget | pendente | ✅ 3 test OK |
-| T-111 | AGENT 02 | Integrazione Destructible in Weapon.cs (penetrazione uniforme) | pendente | ✅ compila |
-| T-112 | AGENT 10 | Correzione FindObjectOfType → FindFirstObjectByType | pendente | ✅ 0 warning |
-| T-113 | AGENT 10 | Test DestructibleTests.cs (3 test, maxIntegrity inizializzato) | pendente | ✅ 3/3 passati |
+| T-110 | AGENT 08 | Distruzione persistente: Destructible + IBallisticTarget | 0ca9a79 | ✅ 3 test OK |
+| T-111 | AGENT 02 | Integrazione Destructible in Weapon.cs (penetrazione uniforme) | 0ca9a79 | ✅ compila |
+| T-112 | AGENT 10 | Correzione FindObjectOfType → FindFirstObjectByType | 0ca9a79 | ✅ 0 warning |
+| T-113 | AGENT 10 | Test DestructibleTests.cs (3 test, maxIntegrity inizializzato) | 0ca9a79 | ✅ 3/3 passati |
 | T-090 | TUTTI | Audit completo 10 domini + fix | d4c680d | ✅ 0 errori, 17/17 test, build OK |
 | T-089 | AGENT 09 | Throttling percezione/occlusione 10 Hz | d4c680d | ✅ |
 | T-088 | AGENT 08 | Fix riferimenti scena → VEVE.Runtime | 99d66f2 | ✅ |
