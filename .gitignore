@@ -31,3 +31,8 @@ sysinfo.txt
 # OS files
 .DS_Store
 Thumbs.db
+
+# Stray/duplicate Unity projects and editor artifacts
+My project*/
+.crash/
+*.log.*

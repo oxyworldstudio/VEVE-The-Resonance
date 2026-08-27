@@ -9,8 +9,10 @@ namespace VEVE
         [SerializeField] private float viewAngle = 100f;
         [SerializeField] private float hearingScale = 0.8f;
         [SerializeField, Range(0f, 1f)] private float hearingAbsorption;
+        [SerializeField, Min(0.02f)] private float perceptionInterval = 0.1f;
         private Vector3 lastKnownPosition;
         private float lastNoiseTime = -Mathf.Infinity;
+        private float nextPerception;
         public AwarenessState State { get; private set; } = AwarenessState.Patrol;
 
         private void OnEnable() => TacticalSound.NoiseProduced += OnNoise;
@@ -32,18 +34,27 @@ namespace VEVE
         {
             if (target == null) return;
             Vector3 delta = target.position - transform.position;
-            if (delta.magnitude > viewDistance || Vector3.Angle(transform.forward, delta) > viewAngle * 0.5f) return;
-            if (Physics.Raycast(transform.position + Vector3.up, delta.normalized, out RaycastHit hit, viewDistance) &&
-                hit.transform == target)
+            if (Time.unscaledTime >= nextPerception)
             {
-                lastKnownPosition = target.position;
-                State = AwarenessState.Engaged;
+                nextPerception = Time.unscaledTime + perceptionInterval;
+                UpdatePerception(delta);
             }
             if (lastKnownPosition != Vector3.zero)
             {
                 transform.position = Vector3.MoveTowards(transform.position, lastKnownPosition, 1.2f * Time.deltaTime);
                 if (Vector3.Distance(transform.position, lastKnownPosition) < 0.2f && State == AwarenessState.Investigate)
                     State = AwarenessState.Patrol;
+            }
+        }
+
+        private void UpdatePerception(Vector3 delta)
+        {
+            if (delta.magnitude > viewDistance || Vector3.Angle(transform.forward, delta) > viewAngle * 0.5f) return;
+            if (Physics.Raycast(transform.position + Vector3.up, delta.normalized, out RaycastHit hit, viewDistance) &&
+                hit.transform == target)
+            {
+                lastKnownPosition = target.position;
+                State = AwarenessState.Engaged;
             }
         }
     }
