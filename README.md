@@ -17,3 +17,9 @@ Material resistance is data-driven through `Ballistics`.
 
 Batch-mode validation (2026-08-27): scene generated, 17/17 EditMode tests
 passed, WebGL build succeeded (6.4 MB).
+
+Scene integrity: all script references point to the `VEVE.Runtime` assembly
+(no stale `Assembly-CSharp` identifiers).
+
+Play the WebGL build online:
+https://oxyworldstudio.github.io/VEVE-The-Resonance/
