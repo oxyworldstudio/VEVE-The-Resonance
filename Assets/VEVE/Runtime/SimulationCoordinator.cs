@@ -14,9 +14,9 @@ namespace VEVE
 
         private void Awake()
         {
-            if (environment == null) environment = FindObjectOfType<EnvironmentSimulation>();
-            if (mission == null) mission = FindObjectOfType<MissionRuntime>();
-            if (campaign == null) campaign = FindObjectOfType<CampaignState>();
+            if (environment == null) environment = FindFirstObjectByType<EnvironmentSimulation>();
+            if (mission == null) mission = FindFirstObjectByType<MissionRuntime>();
+            if (campaign == null) campaign = FindFirstObjectByType<CampaignState>();
             if (environment == null || mission == null || campaign == null)
                 Debug.LogError("VEVE simulation is missing a required subsystem reference.", this);
         }

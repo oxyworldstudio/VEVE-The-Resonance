@@ -72,20 +72,30 @@ namespace VEVE
             {
                 if (hit.collider.transform.IsChildOf(transform) || hit.collider.transform == transform) continue;
                 Damageable target = hit.collider.GetComponentInParent<Damageable>();
-                SurfaceMaterial material = hit.collider.sharedMaterial != null && hit.collider.sharedMaterial.name.Contains("Concrete")
-                    ? SurfaceMaterial.Concrete : SurfaceMaterial.Wood;
-                CoverVolume cover = hit.collider.GetComponent<CoverVolume>();
-                float thickness = cover == null ? 0.1f : cover.Thickness;
                 remainingEnergy = Ballistics.EnergyAfterDistance(remainingEnergy, hit.distance);
-                BallisticImpact impact = Ballistics.ResolveImpact(remainingEnergy, material, thickness);
-                remainingEnergy = impact.remainingEnergy;
-                if (target != null && impact.incomingEnergy > 0f)
+                Destructible destructible = hit.collider.GetComponent<Destructible>();
+                bool absorbed;
+                if (destructible != null)
                 {
-                    float energyRatio = Mathf.Clamp01(impact.incomingEnergy / muzzleEnergy);
+                    absorbed = destructible.AbsorbImpact(remainingEnergy, out remainingEnergy);
+                }
+                else
+                {
+                    SurfaceMaterial material = hit.collider.sharedMaterial != null && hit.collider.sharedMaterial.name.Contains("Concrete")
+                        ? SurfaceMaterial.Concrete : SurfaceMaterial.Wood;
+                    CoverVolume cover = hit.collider.GetComponent<CoverVolume>();
+                    float thickness = cover == null ? 0.1f : cover.Thickness;
+                    BallisticImpact impact = Ballistics.ResolveImpact(remainingEnergy, material, thickness);
+                    remainingEnergy = impact.remainingEnergy;
+                    absorbed = impact.penetrated;
+                }
+                if (target != null && remainingEnergy >= 0f && absorbed)
+                {
+                    float energyRatio = Mathf.Clamp01(remainingEnergy / muzzleEnergy);
                     target.ApplyDamage(damage * energyRatio, hit.collider.name.ToLowerInvariant().Contains("head") ? HitZone.Head : HitZone.Torso);
                     break;
                 }
-                if (!impact.penetrated) break;
+                if (!absorbed) break;
             }
         }
 

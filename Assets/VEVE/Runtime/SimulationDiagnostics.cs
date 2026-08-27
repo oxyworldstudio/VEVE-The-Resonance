@@ -18,7 +18,7 @@ namespace VEVE
 
         private void ValidateReference<T>(string name) where T : Component
         {
-            if (FindObjectOfType<T>() == null)
+            if (FindFirstObjectByType<T>() == null)
                 Debug.LogError("VEVE diagnostic: missing " + name + " component.", this);
         }
     }
