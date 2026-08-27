@@ -15,5 +15,5 @@ an operator with weighted acceleration, a deterministic hitscan carbine, a
 localized-damage enemy, basic perception AI, and a diegetic-style field readout.
 Material resistance is data-driven through `Ballistics`.
 
-The installed Unity Editor currently requires activation before batch-mode
-validation or scene generation can run.
+Batch-mode validation (2026-08-27): scene generated, 17/17 EditMode tests
+passed, WebGL build succeeded (6.4 MB).
