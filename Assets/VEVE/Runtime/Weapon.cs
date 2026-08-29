@@ -81,10 +81,21 @@ namespace VEVE
                 }
                 else
                 {
-                    SurfaceMaterial material = hit.collider.sharedMaterial != null && hit.collider.sharedMaterial.name.Contains("Concrete")
-                        ? SurfaceMaterial.Concrete : SurfaceMaterial.Wood;
                     CoverVolume cover = hit.collider.GetComponent<CoverVolume>();
-                    float thickness = cover == null ? 0.1f : cover.Thickness;
+                    SurfaceMaterial material;
+                    float thickness;
+                    if (cover != null)
+                    {
+                        material = cover.Material;
+                        thickness = cover.Thickness;
+                    }
+                    else
+                    {
+                        Renderer hitRenderer = hit.collider.GetComponent<Renderer>();
+                        material = hitRenderer != null && hitRenderer.sharedMaterial != null && hitRenderer.sharedMaterial.name.Contains("Concrete")
+                            ? SurfaceMaterial.Concrete : SurfaceMaterial.Wood;
+                        thickness = 0.1f;
+                    }
                     BallisticImpact impact = Ballistics.ResolveImpact(remainingEnergy, material, thickness);
                     remainingEnergy = impact.remainingEnergy;
                     absorbed = impact.penetrated;

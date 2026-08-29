@@ -19,4 +19,20 @@ public sealed class CombatStateTests
             Object.DestroyImmediate(coverObject);
         }
     }
+
+    [Test]
+    public void CoverVolumeExposesMaterialAndThickness()
+    {
+        GameObject coverObject = new GameObject("CoverTest");
+        try
+        {
+            CoverVolume cover = coverObject.AddComponent<CoverVolume>();
+            Assert.AreEqual(SurfaceMaterial.Wood, cover.Material);
+            Assert.AreEqual(0.3f, cover.Thickness, 0.001f);
+        }
+        finally
+        {
+            Object.DestroyImmediate(coverObject);
+        }
+    }
 }

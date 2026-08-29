@@ -5,7 +5,7 @@
 
 ## Pipeline di validazione (sempre verde prima di chiudere un task)
 - [x] Compilazione: 0 errori / 0 warning
-- [x] Test EditMode: 20/20 (17 originali + 3 Destructible)
+- [x] Test EditMode: 21/21 (17 originali + 3 Destructible + 1 CoverVolume)
 - [x] Build WebGL: success (Builds/WebGL data file aggiornata)
 - [x] Scena integra: 0 riferimenti `Assembly-CSharp`
 - [x] Pubblicazione Pages: HTTP 200
@@ -18,6 +18,7 @@
 | T-111 | AGENT 02 | Integrazione Destructible in Weapon.cs (penetrazione uniforme) | 0ca9a79 | ✅ compila |
 | T-112 | AGENT 10 | Correzione FindObjectOfType → FindFirstObjectByType | 0ca9a79 | ✅ 0 warning |
 | T-113 | AGENT 10 | Test DestructibleTests.cs (3 test, maxIntegrity inizializzato) | 0ca9a79 | ✅ 3/3 passati |
+| T-114 | AGENT 02/03 | Fix inferenza materiale in Weapon.cs: Collider.sharedMaterial (PhysicMaterial) → Renderer.sharedMaterial + CoverVolume.Material | — | ✅ 1 test aggiuntivo |
 | T-090 | TUTTI | Audit completo 10 domini + fix | d4c680d | ✅ 0 errori, 17/17 test, build OK |
 | T-089 | AGENT 09 | Throttling percezione/occlusione 10 Hz | d4c680d | ✅ |
 | T-088 | AGENT 08 | Fix riferimenti scena → VEVE.Runtime | 99d66f2 | ✅ |
