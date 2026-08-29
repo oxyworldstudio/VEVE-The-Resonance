@@ -147,6 +147,12 @@ namespace VEVE.Editor
             readoutData.FindProperty("movement").objectReferenceValue = player.GetComponent<MovementSimulation>(); 
             readoutData.ApplyModifiedPropertiesWithoutUndo();
             
+            GameObject rayTracingObject = new GameObject("RayTracingManager");
+            rayTracingObject.AddComponent<RayTracingManager>();
+            
+            GameObject audioObject = new GameObject("AdvancedAudio");
+            audioObject.AddComponent<AudioSource>();
+            
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), "Assets/Scenes/VEVE_Milestone1.unity");
             AssetDatabase.SaveAssets();
         }
