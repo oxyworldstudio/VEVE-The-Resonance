@@ -30,4 +30,38 @@ public sealed class BallisticsTests
         Assert.Greater(Ballistics.EnergyAfterDistance(100f, 0f),
             Ballistics.EnergyAfterDistance(100f, 50f));
     }
+
+    [Test]
+    public void GravityDropIncreasesWithDistance()
+    {
+        Assert.Less(Ballistics.GravityDrop(800f, 10f), Ballistics.GravityDrop(800f, 100f));
+    }
+
+    [Test]
+    public void WindDriftCalculatesLateralDeviation()
+    {
+        float drift = Ballistics.WindDrift(100f, 5f, 90f, 800f);
+        Assert.Greater(drift, 0f);
+    }
+
+    [Test]
+    public void PenetrationDepthScalesWithEnergy()
+    {
+        Assert.Greater(Ballistics.CalculatePenetrationDepth(500f, SurfaceMaterial.Wood),
+            Ballistics.CalculatePenetrationDepth(100f, SurfaceMaterial.Wood));
+    }
+
+    [Test]
+    public void MaterialResistanceValuesAreReasonable()
+    {
+        Assert.Greater(MaterialDefinition.GetResistance(SurfaceMaterial.Metal),
+            MaterialDefinition.GetResistance(SurfaceMaterial.Wood));
+    }
+
+    [Test]
+    public void AcousticAbsorptionVariesByMaterial()
+    {
+        Assert.Greater(MaterialDefinition.GetAbsorption(SurfaceMaterial.Fabric),
+            MaterialDefinition.GetAbsorption(SurfaceMaterial.Metal));
+    }
 }

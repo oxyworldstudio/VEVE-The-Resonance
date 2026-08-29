@@ -47,15 +47,34 @@ namespace VEVE
             }
         }
 
-        private void UpdatePerception(Vector3 delta)
+    private void UpdatePerception(Vector3 delta)
+    {
+        if (delta.magnitude > viewDistance) return;
+        float angle = Vector3.Angle(transform.forward, delta.normalized);
+        float halfAngle = viewAngle * 0.5f;
+        if (angle > halfAngle) return;
+
+        if (Physics.Raycast(transform.position + Vector3.up * 1.6f, delta.normalized, out RaycastHit hit, viewDistance))
         {
-            if (delta.magnitude > viewDistance || Vector3.Angle(transform.forward, delta) > viewAngle * 0.5f) return;
-            if (Physics.Raycast(transform.position + Vector3.up, delta.normalized, out RaycastHit hit, viewDistance) &&
-                hit.transform == target)
+            if (hit.transform == target)
             {
-                lastKnownPosition = target.position;
-                State = AwarenessState.Engaged;
+                float distanceFactor = 1f - Mathf.Clamp01(delta.magnitude / viewDistance);
+                float angleFactor = 1f - Mathf.Clamp01(angle / halfAngle);
+                float detectionScore = distanceFactor * 0.6f + angleFactor * 0.4f;
+                if (detectionScore > 0.4f)
+                {
+                    lastKnownPosition = target.position;
+                    State = AwarenessState.Engaged;
+                }
+            }
+            else
+            {
+                if (State == AwarenessState.Engaged && delta.magnitude > viewDistance * 0.7f)
+                {
+                    State = AwarenessState.Investigate;
+                }
             }
         }
+    }
     }
 }

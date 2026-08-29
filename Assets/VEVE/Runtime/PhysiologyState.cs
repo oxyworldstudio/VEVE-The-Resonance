@@ -58,6 +58,11 @@ namespace VEVE
             state.pain = Mathf.Max(0f, state.pain - Mathf.Max(0f, painReduction));
         }
 
+        public void ApplyConsciousnessRecovery(float amount)
+        {
+            state.consciousness = Mathf.Clamp(state.consciousness + Mathf.Max(0f, amount), 0f, 100f);
+        }
+
         private void Update()
         {
             state.bleeding = Mathf.Max(0f, state.bleeding - Time.deltaTime * 0.05f);
