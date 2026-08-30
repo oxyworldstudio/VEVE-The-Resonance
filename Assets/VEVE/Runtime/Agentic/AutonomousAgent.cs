@@ -73,6 +73,14 @@ namespace VEVE.Agentic
         public int TeamId { get; set; } = -1;
 
         /// <summary>
+        /// Gets the current simulation LOD tier, updated every frame by the
+        /// agent tick scheduler relative to the player camera.
+        /// </summary>
+        public VEVE.Agents.AgentLODTier CurrentLOD { get; internal set; } = VEVE.Agents.AgentLODTier.Full;
+
+        private int lodStaggerHash;
+
+        /// <summary>
         /// Reference to the agent's transform, cached for performance.
         /// </summary>
         protected Transform selfTransform;
@@ -85,16 +93,34 @@ namespace VEVE.Agentic
         protected virtual void Awake()
         {
             selfTransform = transform;
+            lodStaggerHash = VEVE.Agents.AgentLOD.GetStaggerFor(GetInstanceID());
+        }
+
+        protected virtual void OnEnable()
+        {
+            if (MultiAgentSystemManager.Instance != null)
+                MultiAgentSystemManager.Instance.RegisterAgent(this);
+        }
+
+        protected virtual void OnDisable()
+        {
+            if (MultiAgentSystemManager.Instance != null)
+                MultiAgentSystemManager.Instance.UnregisterAgent(this);
         }
 
         protected virtual void Update()
         {
-            perceptionTimer += Time.deltaTime;
-            if (perceptionTimer >= updateInterval)
+            CurrentLOD = VEVE.Agents.AgentLOD.ComputeLOD(selfTransform.position, VEVE.Agents.AgentViewContext.Position);
+
+            if (VEVE.Agents.AgentLOD.ShouldTick(CurrentLOD, lodStaggerHash))
             {
-                perceptionTimer = 0f;
-                PerceptionCycle();
-                DecisionCycle();
+                perceptionTimer += Time.deltaTime;
+                if (perceptionTimer >= updateInterval)
+                {
+                    perceptionTimer = 0f;
+                    PerceptionCycle();
+                    DecisionCycle();
+                }
             }
             ActionCycle();
         }
@@ -145,10 +171,21 @@ namespace VEVE.Agentic
         }
 
         /// <summary>
-        /// Decision cycle: processes perception data to choose behavior.
+        /// Decision cycle: routes through the cognition bridge when available
+        /// (local heuristic planner, optionally refined asynchronously by the
+        /// Python sidecar), falling back to the in-agent heuristic otherwise.
         /// </summary>
         protected virtual void DecisionCycle()
         {
+            if (VEVE.Agents.AgentBridge.UseBridgeDecisionPath &&
+                VEVE.Agents.AgentBridge.Instance != null &&
+                VEVE.Agents.AgentBridge.Instance.TryGetDecision(this, out DecisionResult bridged))
+            {
+                LastDecision = bridged;
+                CurrentState = bridged.nextState;
+                return;
+            }
+
             DecisionResult decision = new DecisionResult
             {
                 nextState = CurrentState,

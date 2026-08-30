@@ -53,6 +53,9 @@ namespace VEVE
             if (environment == null || mission == null || campaign == null || physicsRealism == null || renderingRealism == null)
                 Debug.LogError("VEVE simulation is missing a required subsystem reference.", this);
 
+            if (FindFirstObjectByType<VEVE.Agents.AgentBridge>() == null)
+                gameObject.AddComponent<VEVE.Agents.AgentBridge>();
+
             ApplyRealismConfig();
             ApplyQualityPreset();
             CurrentState = SimulatorState.Running;
