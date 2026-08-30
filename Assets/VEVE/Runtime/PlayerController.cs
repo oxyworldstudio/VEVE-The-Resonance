@@ -6,6 +6,8 @@ namespace VEVE
 {
     /// <summary>
     /// Enhanced player controller with realistic movement model including momentum, inertia, and posture transitions.
+    /// Vertical integration is routed through the static helpers below so gravity sign and behaviour are unit-testable
+    /// without a live physics scene. Gravity is a signed downward acceleration (CODATA standard -9.80665 m/s²).
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public sealed class PlayerController : MonoBehaviour
@@ -17,7 +19,7 @@ namespace VEVE
         [SerializeField] private float proneSpeed = 0.35f;
         [SerializeField] private float acceleration = 3f;
         [SerializeField] private float deceleration = 6f;
-        [SerializeField] private float gravity = 9.81f;
+        [SerializeField] private float gravity = DefaultGravity;
         [SerializeField] private float jumpForce = 3f;
         [SerializeField] private float mass = 80f;
         [SerializeField] private float airControl = 0.4f;
@@ -32,6 +34,18 @@ namespace VEVE
         [SerializeField] private float inertiaTensor = 10f;
 
         [SerializeField] private RealismConfig realismConfig;
+
+        /// <summary>
+        /// Standard gravitational acceleration magnitude (CODATA). The signed field value
+        /// must always be negative (downward in Unity's left-handed Y-up space).
+        /// </summary>
+        public const float StandardGravityAcceleration = 9.80665f;
+
+        /// <summary>Sentinel velocity that keeps the controller pressed against the ground.</summary>
+        public const float GroundedStickVelocity = -2f;
+
+        /// <summary>Default serialized (signed downward) gravity.</summary>
+        public const float DefaultGravity = -StandardGravityAcceleration;
 
         private CharacterController controller;
         private Vector3 velocity;
@@ -49,6 +63,31 @@ namespace VEVE
         public event Action<OperatorPosture> OnPostureChanged;
         public event Action<float> OnSpeedChanged;
 
+        /// <summary>
+        /// Integrates the vertical velocity component for one tick. Order of operations:
+        /// ground contact clamp → jump impulse → gravity accumulation (gravity must be negative).
+        /// </summary>
+        public static float IntegrateVerticalVelocity(
+            float velocityY, bool isGrounded, bool jumpPressed, float gravity, float deltaTime, float jumpForce)
+        {
+            if (isGrounded && velocityY < 0f)
+                velocityY = GroundedStickVelocity;
+
+            if (isGrounded && jumpPressed)
+                velocityY = Mathf.Abs(jumpForce);
+
+            return velocityY + gravity * Mathf.Max(0f, deltaTime);
+        }
+
+        /// <summary>
+        /// Verifies the gravity value is physically consistent (downward / non-positive).
+        /// A positive gravity accelerates the player off the ground ("launch to the sky").
+        /// </summary>
+        public static float SanitizeGravity(float configuredGravity)
+        {
+            return configuredGravity > 0f ? -configuredGravity : configuredGravity;
+        }
+
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
@@ -58,6 +97,19 @@ namespace VEVE
             stamina = GetComponent<StaminaSystem>();
             lastFrameVelocity = Vector3.zero;
             lastPosture = OperatorPosture.Standing;
+
+            gravity = SanitizeGravity(gravity);
+        }
+
+        private void Start()
+        {
+            if (realismConfig != null)
+            {
+                walkSpeed = 1.4f;
+                sprintSpeed = 2.5f;
+                acceleration = 3f;
+                gravity = -realismConfig.StandardGravity;
+            }
         }
 
         private void Update()
@@ -88,16 +140,13 @@ namespace VEVE
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accel * controlFactor * Time.deltaTime);
 
             Vector3 desiredVelocity = input * currentSpeed;
-            Vector3 momentumVelocity = velocity * momentumPreservation;
+            Vector3 momentumVelocity = new Vector3(velocity.x, 0f, velocity.z) * momentumPreservation;
             Vector3 finalVelocity = Vector3.Lerp(momentumVelocity, desiredVelocity, controlFactor * 0.5f);
-            finalVelocity.y = velocity.y;
+            finalVelocity.y = IntegrateVerticalVelocity(
+                velocity.y, controller.isGrounded, Input.GetKeyDown(KeyCode.Space), gravity, Time.deltaTime, jumpForce);
 
-            if (controller.isGrounded && velocity.y < 0f) velocity.y = -2f;
-            if (Input.GetKeyDown(KeyCode.Space) && controller.isGrounded) velocity.y = jumpForce;
-            velocity.y += gravity * Time.deltaTime;
-
-            Vector3 movementDelta = (finalVelocity * Time.deltaTime) + (velocity * Time.deltaTime);
-            controller.Move(movementDelta);
+            velocity = finalVelocity;
+            controller.Move(velocity * Time.deltaTime);
 
             OnSpeedChanged?.Invoke(currentSpeed);
             lastFrameVelocity = velocity;
@@ -130,11 +179,13 @@ namespace VEVE
 
         private void ApplyInertialDamping()
         {
+            if (controller == null) return;
             float dampingFactor = 1f - linearDamping * Time.fixedDeltaTime;
-            velocity *= dampingFactor;
-            if (velocity.magnitude < 0.01f && controller.isGrounded)
+            Vector3 horizontal = new Vector3(velocity.x, 0f, velocity.z);
+            velocity = horizontal * dampingFactor + Vector3.up * velocity.y;
+            if (velocity.x * velocity.x + velocity.z * velocity.z < 0.0001f && controller.isGrounded)
             {
-                velocity = Vector3.zero;
+                velocity = new Vector3(0f, velocity.y, 0f);
             }
         }
 
@@ -148,21 +199,11 @@ namespace VEVE
             velocity += pushDirection * hit.moveLength;
         }
 
-        private void Start()
-        {
-            if (realismConfig != null)
-            {
-                walkSpeed = 1.4f;
-                sprintSpeed = 2.5f;
-                acceleration = 3f;
-                gravity = realismConfig.StandardGravity;
-            }
-        }
-
         public Vector3 Velocity => velocity;
         public float CurrentSpeed => currentSpeed;
         public float SlopeAngle => slopeAngle;
         public float Mass => mass;
         public float InertiaTensor => inertiaTensor;
+        public float Gravity => gravity;
     }
 }

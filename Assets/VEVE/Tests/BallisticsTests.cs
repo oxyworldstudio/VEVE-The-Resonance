@@ -18,8 +18,8 @@ public sealed class BallisticsTests
     [Test]
     public void ImpactReportsEnergyLossAndPenetration()
     {
-        BallisticImpact impact = Ballistics.ResolveImpact(10f, SurfaceMaterial.Wood, 1f);
-        Assert.AreEqual(10f, impact.incomingEnergy);
+        BallisticImpact impact = Ballistics.ResolveImpact(100f, SurfaceMaterial.Wood, 1f);
+        Assert.AreEqual(100f, impact.incomingEnergy);
         Assert.Less(impact.remainingEnergy, impact.incomingEnergy);
         Assert.IsTrue(impact.penetrated);
     }
