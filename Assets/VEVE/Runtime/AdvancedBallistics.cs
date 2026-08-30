@@ -1,24 +1,31 @@
 using UnityEngine;
+using VEVE.Realism;
 
 namespace VEVE
 {
-    public enum ProjectileType { FullMetalJacket, HollowPoint, ArmorPiercing, Tracer }
+    public enum ProjectileType { FullMetalJacket, HollowPoint, ArmorPiercing, Tracer, Subsonic }
 
     public readonly struct BallisticSolution
     {
         public readonly float timeOfFlight;
         public readonly float drop;
         public readonly float windDrift;
+        public readonly float coriolisDrift;
+        public readonly float spinDrift;
         public readonly float energyRemaining;
         public readonly float penetrationDepth;
+        public readonly float retainedVelocity;
 
-        public BallisticSolution(float timeOfFlight, float drop, float windDrift, float energyRemaining, float penetrationDepth)
+        public BallisticSolution(float timeOfFlight, float drop, float windDrift, float coriolisDrift, float spinDrift, float energyRemaining, float penetrationDepth, float retainedVelocity)
         {
             this.timeOfFlight = timeOfFlight;
             this.drop = drop;
             this.windDrift = windDrift;
+            this.coriolisDrift = coriolisDrift;
+            this.spinDrift = spinDrift;
             this.energyRemaining = energyRemaining;
             this.penetrationDepth = penetrationDepth;
+            this.retainedVelocity = retainedVelocity;
         }
     }
 
@@ -31,43 +38,36 @@ namespace VEVE
             float ballisticCoefficient,
             float windSpeed,
             float windAngle,
-            float gravity = 9.81f,
+            float latitude,
+            float twistRate,
             float temperature = 15f,
             float humidity = 0.5f,
+            float altitude = 0f,
             ProjectileType type = ProjectileType.FullMetalJacket)
         {
-            float flightTime = distance / muzzleVelocity;
-            float drop = 0.5f * gravity * flightTime * flightTime;
-            float windDrift = windSpeed * Mathf.Sin(windAngle * Mathf.Deg2Rad) * flightTime * flightTime * 0.5f;
-            float airDensity = CalculateAirDensity(temperature, humidity);
-            float velocity = muzzleVelocity * Mathf.Exp(-ballisticCoefficient * airDensity * distance);
+            float airDensity = RealismConfig.CalculateAirDensity(altitude, temperature);
+            float dragDeceleration = 0.5f * airDensity * muzzleVelocity * muzzleVelocity * ballisticCoefficient * 0.01f;
+            float flightTime = 2f * distance / (muzzleVelocity + Mathf.Max(0f, muzzleVelocity - dragDeceleration * distance));
+            float velocity = muzzleVelocity - dragDeceleration * flightTime;
+            float drop = 0.5f * 9.80665f * flightTime * flightTime;
+            float windDrift = 0.5f * airDensity * windSpeed * windSpeed * 0.01f * flightTime * flightTime * Mathf.Sin(windAngle * Mathf.Deg2Rad);
+            float coriolisDrift = Ballistics.CoriolisDrift(latitude, windAngle, distance, velocity);
+            float spinDrift = Ballistics.SpinDrift(twistRate, distance, velocity);
             float energy = 0.5f * bulletMass * velocity * velocity;
-            float penetrationDepth = CalculatePenetration(energy, type);
-            return new BallisticSolution(flightTime, drop, windDrift, energy, penetrationDepth);
-        }
-
-        private static float CalculateAirDensity(float temperatureCelsius, float humidity)
-        {
-            float temperatureKelvin = temperatureCelsius + 273.15f;
-            float pressure = 101325f;
-            float gasConstant = 287.05f;
-            float saturationVaporPressure = 610.94f * Mathf.Exp((17.625f * temperatureCelsius) / (temperatureCelsius + 243.04f));
-            float vaporPressure = humidity * saturationVaporPressure;
-            float dryAirPressure = pressure - vaporPressure;
-            return dryAirPressure / (gasConstant * temperatureKelvin);
-        }
-
-        private static float CalculatePenetration(float energy, ProjectileType type)
-        {
-            float coefficient = type switch
+            float penetrationDepth = Ballistics.CalculatePenetrationDepth(energy, type switch
             {
-                ProjectileType.FullMetalJacket => 1.0f,
-                ProjectileType.HollowPoint => 0.6f,
-                ProjectileType.ArmorPiercing => 1.8f,
-                ProjectileType.Tracer => 0.9f,
-                _ => 1.0f,
-            };
-            return energy * coefficient / 80f;
+                ProjectileType.ArmorPiercing => SurfaceMaterial.Metal,
+                ProjectileType.HollowPoint => SurfaceMaterial.Fabric,
+                _ => SurfaceMaterial.Concrete
+            });
+            return new BallisticSolution(flightTime, drop, windDrift, coriolisDrift, spinDrift, energy, penetrationDepth, velocity);
+        }
+
+        public static float CalculateStabilityFactor(float twistRate, float bulletLength, float bulletDiameter, float muzzleVelocity)
+        {
+            float gyration = bulletLength * 0.6f;
+            float stability = (twistRate * gyration * gyration) / (0.4f * muzzleVelocity * muzzleVelocity * bulletDiameter * bulletDiameter * bulletDiameter);
+            return stability;
         }
     }
 }

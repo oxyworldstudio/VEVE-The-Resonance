@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using VEVE.Realism;
 
 namespace VEVE
 {
@@ -7,17 +8,18 @@ namespace VEVE
 
     public sealed class RayTracingManager : MonoBehaviour
     {
-        [SerializeField] private RayTracingQuality quality = RayTracingQuality.Medium;
+        [SerializeField] private RayTracingQuality quality = RayTracingQuality.Ultra;
         [SerializeField] private bool enableReflections = true;
         [SerializeField] private bool enableShadows = true;
         [SerializeField] private bool enableAmbientOcclusion = true;
-        [SerializeField] private bool enableGlobalIllumination = false;
-        [SerializeField] private float reflectionDistance = 100f;
-        [SerializeField] private float shadowDistance = 50f;
-        [SerializeField] private int reflectionSamples = 1;
-        [SerializeField] private int shadowSamples = 1;
+        [SerializeField] private bool enableGlobalIllumination = true;
+        [SerializeField] private float reflectionDistance = 500f;
+        [SerializeField] private float shadowDistance = 200f;
+        [SerializeField] private int reflectionSamples = 4;
+        [SerializeField] private int shadowSamples = 4;
         [SerializeField] private float aoRadius = 0.5f;
-        [SerializeField] private int aoSamples = 8;
+        [SerializeField] private int aoSamples = 32;
+        [SerializeField] private RealismConfig realismConfig;
 
         public RayTracingQuality Quality
         {
@@ -32,6 +34,10 @@ namespace VEVE
         private void Start()
         {
             ApplyQualitySettings();
+            if (realismConfig != null)
+            {
+                Quality = realismConfig.ForceUltraQuality ? RayTracingQuality.Ultra : RayTracingQuality.High;
+            }
         }
 
         private void Update()
@@ -59,19 +65,11 @@ namespace VEVE
                     SetRayTracingEnabled(true);
                     reflectionSamples = 1;
                     shadowSamples = 1;
-                    aoSamples = 4;
-                    reflectionDistance = 50f;
-                    shadowDistance = 25f;
-                    break;
-                case RayTracingQuality.Medium:
-                    SetRayTracingEnabled(true);
-                    reflectionSamples = 1;
-                    shadowSamples = 1;
                     aoSamples = 8;
                     reflectionDistance = 100f;
                     shadowDistance = 50f;
                     break;
-                case RayTracingQuality.High:
+                case RayTracingQuality.Medium:
                     SetRayTracingEnabled(true);
                     reflectionSamples = 2;
                     shadowSamples = 2;
@@ -79,7 +77,7 @@ namespace VEVE
                     reflectionDistance = 200f;
                     shadowDistance = 100f;
                     break;
-                case RayTracingQuality.Ultra:
+                case RayTracingQuality.High:
                     SetRayTracingEnabled(true);
                     reflectionSamples = 4;
                     shadowSamples = 4;
@@ -87,14 +85,25 @@ namespace VEVE
                     reflectionDistance = 500f;
                     shadowDistance = 200f;
                     break;
+                case RayTracingQuality.Ultra:
+                    SetRayTracingEnabled(true);
+                    reflectionSamples = 8;
+                    shadowSamples = 8;
+                    aoSamples = 64;
+                    reflectionDistance = 1000f;
+                    shadowDistance = 500f;
+                    break;
+            }
+
+            if (realismConfig != null)
+            {
+                reflectionDistance = realismConfig.ShadowDistance;
+                shadowDistance = realismConfig.ShadowDistance;
             }
         }
 
         private void SetRayTracingEnabled(bool enabled)
         {
-            // Ray tracing support in Unity 6 requires URP/HDRP with ray tracing enabled.
-            // This manager centralizes quality parameters so they can be consumed by
-            // rendering pipelines or post-processing stacks without hard dependencies.
             if (enabled)
             {
                 Debug.Log("[RayTracing] Ray tracing enabled. Ensure your render pipeline supports DXR/VK_KHR_ray_tracing.");

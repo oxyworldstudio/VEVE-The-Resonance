@@ -1,28 +1,22 @@
 using UnityEngine;
+using VEVE.Realism;
 
 namespace VEVE
 {
     [RequireComponent(typeof(CharacterController))]
     public sealed class PlayerController : MonoBehaviour
     {
-        [SerializeField] private float walkSpeed = 4f;
-        [SerializeField] private float sprintSpeed = 6f;
-        [SerializeField] private float acceleration = 12f;
-        [SerializeField] private float gravity = -20f;
+        [SerializeField] private float walkSpeed = 1.4f;
+        [SerializeField] private float sprintSpeed = 2.5f;
+        [SerializeField] private float acceleration = 3f;
+        [SerializeField] private float gravity = 9.81f;
+        [SerializeField] private RealismConfig realismConfig;
         private CharacterController controller;
         private Vector3 velocity;
         private float currentSpeed;
         private Physiology physiology;
         private PhysicalInventory inventory;
         private MovementSimulation movement;
-
-        private void Awake()
-        {
-            controller = GetComponent<CharacterController>();
-            physiology = GetComponent<Physiology>();
-            inventory = GetComponent<PhysicalInventory>();
-            movement = GetComponent<MovementSimulation>();
-        }
 
         private void Update()
         {
@@ -44,6 +38,17 @@ namespace VEVE
             if (controller.isGrounded && velocity.y < 0f) velocity.y = -2f;
             velocity.y += gravity * Time.deltaTime;
             controller.Move(velocity * Time.deltaTime);
+        }
+
+        private void Start()
+        {
+            if (realismConfig != null)
+            {
+                walkSpeed = 1.4f;
+                sprintSpeed = 2.5f;
+                acceleration = 3f;
+                gravity = realismConfig.StandardGravity;
+            }
         }
     }
 }

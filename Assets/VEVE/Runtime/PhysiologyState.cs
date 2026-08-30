@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using VEVE.Realism;
 
 namespace VEVE
 {
@@ -14,13 +15,15 @@ namespace VEVE
         [Range(0f, 100f)] public float fracture;
         [Min(30f)] public float heartRate;
         [Range(0f, 100f)] public float respiration;
+        public float bloodLossVolume;
 
         public static PhysiologyState Stable => new PhysiologyState
         {
             hydration = 100f,
             consciousness = 100f,
             heartRate = 65f,
-            respiration = 15f
+            respiration = 15f,
+            bloodLossVolume = 0f
         };
     }
 
@@ -31,20 +34,46 @@ namespace VEVE
             hydration = 100f,
             consciousness = 100f,
             heartRate = 65f,
-            respiration = 15f
+            respiration = 15f,
+            bloodLossVolume = 0f
         };
 
-        public PhysiologyState State => state;
-        public float MovementFactor => Mathf.Clamp01(1f - state.pain * 0.004f - state.bleeding * 0.003f - state.fracture * 0.004f);
-        public float AimStabilityFactor => Mathf.Clamp01(1f - state.pain * 0.005f - state.stress * 0.002f - state.respiration * 0.002f);
+        [SerializeField] private RealismConfig realismConfig;
 
-        public void ApplyWound(float bleeding, float pain)
+        public PhysiologyState State => state;
+
+        public float MovementFactor
+        {
+            get
+            {
+                if (realismConfig == null) return Mathf.Clamp01(1f - state.pain * 0.004f - state.bleeding * 0.003f - state.fracture * 0.004f);
+                float bloodLossRatio = state.bloodLossVolume / realismConfig.BloodVolumeLiters;
+                float heartRateFactor = Mathf.Clamp01(1f - (state.heartRate - realismConfig.RestingHeartRateBPM) / (realismConfig.MaxHeartRateBPM - realismConfig.RestingHeartRateBPM));
+                float respirationFactor = Mathf.Clamp01(1f - state.respiration / realismConfig.MaxRespirationRate);
+                return Mathf.Clamp01(1f - state.pain * 0.004f - bloodLossRatio * 0.5f - state.fracture * 0.004f + heartRateFactor * 0.1f + respirationFactor * 0.1f);
+            }
+        }
+
+        public float AimStabilityFactor
+        {
+            get
+            {
+                if (realismConfig == null) return Mathf.Clamp01(1f - state.pain * 0.005f - state.stress * 0.002f - state.respiration * 0.002f);
+                float bloodLossRatio = state.bloodLossVolume / realismConfig.BloodVolumeLiters;
+                float consciousnessFactor = Mathf.Clamp01(state.consciousness / 100f);
+                return Mathf.Clamp01(1f - state.pain * 0.005f - bloodLossRatio * 0.7f - state.stress * 0.002f - state.respiration * 0.002f + consciousnessFactor * 0.2f);
+            }
+        }
+
+        public void ApplyWound(float bleeding, float pain, float bloodLossRate = 0.1f)
         {
             state.bleeding = Mathf.Clamp(state.bleeding + Mathf.Max(0f, bleeding), 0f, 100f);
             state.pain = Mathf.Clamp(state.pain + Mathf.Max(0f, pain), 0f, 100f);
-            state.consciousness = Mathf.Clamp(state.consciousness - pain * 0.1f, 0f, 100f);
-            state.heartRate = Mathf.Clamp(state.heartRate + pain * 0.25f, 30f, 220f);
-            state.respiration = Mathf.Clamp(state.respiration + pain * 0.15f, 8f, 60f);
+            state.bloodLossVolume += bloodLossRate * Time.deltaTime;
+            float bloodLossRatio = realismConfig != null ? state.bloodLossVolume / realismConfig.BloodVolumeLiters : state.bloodLossVolume / 5f;
+            state.consciousness = Mathf.Clamp(state.consciousness - bloodLossRatio * 50f - pain * 0.1f, 0f, 100f);
+            state.heartRate = Mathf.Clamp(state.heartRate + pain * 0.25f + bloodLossRatio * 100f, 30f, 220f);
+            state.respiration = Mathf.Clamp(state.respiration + pain * 0.15f + bloodLossRatio * 80f, 8f, 60f);
         }
 
         public void ApplyFracture(float severity)
@@ -65,11 +94,14 @@ namespace VEVE
 
         private void Update()
         {
-            state.bleeding = Mathf.Max(0f, state.bleeding - Time.deltaTime * 0.05f);
+            float bloodLossRatio = realismConfig != null ? state.bloodLossVolume / realismConfig.BloodVolumeLiters : state.bloodLossVolume / 5f;
+            state.bleeding = Mathf.Max(0f, state.bleeding - Time.deltaTime * 0.05f * (1f - bloodLossRatio));
             state.pain = Mathf.Max(0f, state.pain - Time.deltaTime * 0.08f);
             state.hydration = Mathf.Max(0f, state.hydration - Time.deltaTime * 0.002f);
-            state.heartRate = Mathf.MoveTowards(state.heartRate, 65f + state.stress * 0.5f, Time.deltaTime * 2f);
-            state.respiration = Mathf.MoveTowards(state.respiration, 15f + state.stress * 0.2f, Time.deltaTime * 0.8f);
+            float targetHeartRate = 65f + state.stress * 0.5f + bloodLossRatio * 80f;
+            state.heartRate = Mathf.MoveTowards(state.heartRate, targetHeartRate, Time.deltaTime * 2f);
+            float targetRespiration = 15f + state.stress * 0.2f + bloodLossRatio * 60f;
+            state.respiration = Mathf.MoveTowards(state.respiration, targetRespiration, Time.deltaTime * 0.8f);
             if (state.respiration > 20f) state.stress = Mathf.Clamp(state.stress + Time.deltaTime * 0.1f, 0f, 100f);
         }
     }

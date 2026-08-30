@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using System.Collections.Generic;
+using VEVE.Realism;
 
 namespace VEVE.Graphics
 {
@@ -51,8 +52,14 @@ namespace VEVE.Graphics
         [Header("Tonemapping")]
         [SerializeField] private TonemappingMode tonemapping = TonemappingMode.ACES;
 
+        [Header("Realism Overrides")]
+        [SerializeField] private bool applyRealismOverrides = true;
+        [SerializeField] private float realismMotionBlurIntensity = 0.3f;
+        [SerializeField] private float realismBloomIntensity = 0.4f;
+        [SerializeField] private float realismFilmGrainIntensity = 0.03f;
+
         public bool MotionBlurEnabled => motionBlurEnabled;
-        public float MotionBlurIntensity => motionBlurIntensity;
+        public float MotionBlurIntensity => applyRealismOverrides ? realismMotionBlurIntensity : motionBlurIntensity;
         public float MotionBlurMaxVelocity => motionBlurMaxVelocity;
         public bool DofEnabled => dofEnabled;
         public float DofNearFocus => dofNearFocus;
@@ -61,14 +68,14 @@ namespace VEVE.Graphics
         public float DofFarBlur => dofFarBlur;
         public bool BloomEnabled => bloomEnabled;
         public float BloomThreshold => bloomThreshold;
-        public float BloomIntensity => bloomIntensity;
+        public float BloomIntensity => applyRealismOverrides ? realismBloomIntensity : bloomIntensity;
         public float BloomRadius => bloomRadius;
         public bool LensFlareEnabled => lensFlareEnabled;
         public float LensFlareIntensity => lensFlareIntensity;
         public bool ChromaticAberrationEnabled => chromaticAberrationEnabled;
         public float ChromaticAberrationIntensity => chromaticAberrationIntensity;
         public bool FilmGrainEnabled => filmGrainEnabled;
-        public float FilmGrainIntensity => filmGrainIntensity;
+        public float FilmGrainIntensity => applyRealismOverrides ? realismFilmGrainIntensity : filmGrainIntensity;
         public bool VignetteEnabled => vignetteEnabled;
         public float VignetteIntensity => vignetteIntensity;
         public float VignetteSmoothness => vignetteSmoothness;

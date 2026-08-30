@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace VEVE
 {
-    [CreateAssetMenu(menuName = "VEVE/Simulation/Weapon Definition")]
-    public sealed class WeaponDefinition : ScriptableObject
+    [CreateAssetMenu(menuName = "VEVE/Simulation/Realistic Weapon Definition")]
+    public sealed class RealisticWeaponDefinition : ScriptableObject
     {
         [Header("General")]
         public string weaponName;
@@ -36,5 +36,21 @@ namespace VEVE
         public float foulingRate = 0.015f;
         public float wearRate = 0.005f;
         public float malfunctionThreshold = 1.25f;
+
+        public float KineticEnergy(float velocity)
+        {
+            return 0.5f * bulletMass * velocity * velocity;
+        }
+
+        public float TimeOfFlight(float distance)
+        {
+            return distance / muzzleVelocity;
+        }
+
+        public float Drop(float distance)
+        {
+            float time = TimeOfFlight(distance);
+            return 0.5f * 9.80665f * time * time;
+        }
     }
 }

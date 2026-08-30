@@ -1,30 +1,32 @@
 using UnityEngine;
+using VEVE.Realism;
 
 namespace VEVE
 {
-    public static class AdvancedSoundPropagation
+    public sealed class AdvancedSoundPropagation : MonoBehaviour
     {
-        public static float CalculateTransmission(float sourceIntensity, float distance, MaterialPreset material, float thickness)
+        [SerializeField] private RealismConfig realismConfig;
+
+        public float CalculateHeardLoudness(float sourceLoudness, float distance, float absorption, float reflectionCoefficient = 0.3f)
         {
-            float absorption = RealisticMaterialLibrary.GetPresetAcousticAbsorption(material);
-            float distanceAttenuation = 1.0f / (1.0f + distance * distance * 0.004f);
-            float thicknessAttenuation = Mathf.Exp(-thickness * (1.0f - absorption) * 3f);
-            return sourceIntensity * distanceAttenuation * thicknessAttenuation * (1.0f - absorption);
+            if (realismConfig == null) return sourceLoudness * 0.5f;
+            float distanceLoss = 1f / (1f + distance * distance * 0.02f);
+            float reflectedEnergy = sourceLoudness * reflectionCoefficient * Mathf.Pow(0.5f, distance / 50f);
+            float totalEnergy = (sourceLoudness * distanceLoss * Mathf.Clamp01(1f - absorption)) + reflectedEnergy;
+            return Mathf.Max(0f, totalEnergy);
         }
 
-        public static float CalculateReflection(Vector3 sourcePos, Vector3 listenerPos, Vector3 surfaceNormal, float surfaceAbsorption)
+        public float CalculateReverbDecay(float roomVolume, float surfaceAbsorption, float speedOfSound = 343f)
         {
-            Vector3 toListener = (listenerPos - sourcePos).normalized;
-            float angle = Vector3.Angle(toListener, surfaceNormal);
-            float reflection = Mathf.Cos(angle * Mathf.Deg2Rad) * (1.0f - surfaceAbsorption);
-            return Mathf.Max(0f, reflection);
+            if (realismConfig != null && !realismConfig.EnableReverb) return 0f;
+            float meanFreePath = 4f * roomVolume / (6f * Mathf.Max(1f, roomVolume));
+            return (meanFreePath * surfaceAbsorption) / speedOfSound;
         }
 
-        public static float CalculateReverberation(float roomVolume, float surfaceAbsorption, float distance)
+        public float CalculateDopplerShift(float sourceVelocity, float listenerVelocity, float frequency, float speedOfSound = 343f)
         {
-            float rt60 = 0.161f * roomVolume / (surfaceAbsorption * 4f + 0.05f);
-            float distanceAttenuation = 1.0f / (1.0f + distance * 0.1f);
-            return distanceAttenuation * Mathf.Exp(-rt60 * 0.5f);
+            float relativeVelocity = sourceVelocity - listenerVelocity;
+            return frequency * (speedOfSound / (speedOfSound - relativeVelocity));
         }
     }
 }
