@@ -56,6 +56,7 @@ namespace VEVE
         private PhysicalInventory inventory;
         private MovementSimulation movement;
         private StaminaSystem stamina;
+        private VEVE.Operators.OperatorInstance @operator;
         private float slopeAngle;
         private float postureTransitionProgress;
         private OperatorPosture lastPosture;
@@ -95,6 +96,7 @@ namespace VEVE
             inventory = GetComponent<PhysicalInventory>();
             movement = GetComponent<MovementSimulation>();
             stamina = GetComponent<StaminaSystem>();
+            @operator = GetComponentInParent<VEVE.Operators.OperatorInstance>();
             lastFrameVelocity = Vector3.zero;
             lastPosture = OperatorPosture.Standing;
 
@@ -121,9 +123,19 @@ namespace VEVE
             slopeAngle = CalculateSlopeAngle();
             bool canMove = slopeAngle <= maxSlopeAngle;
 
-            float baseSpeed = GetPostureSpeed(movement != null ? movement.Posture : OperatorPosture.Standing);
+            OperatorPosture posture = movement != null ? movement.Posture : OperatorPosture.Standing;
+            float baseSpeed = GetPostureSpeed(posture);
             float staminaMultiplier = stamina != null ? stamina.GetStaminaSpeedMultiplier() : 1f;
-            targetSpeed = input.magnitude * baseSpeed * staminaMultiplier;
+            // Operator/gear feel: traits and carried mass scale the walk and sprint targets.
+            // With no OperatorInstance in the chain the multiplier is 1 and behaviour is unchanged.
+            float operatorMoveScale = 1f;
+            if (@operator != null)
+            {
+                operatorMoveScale = posture == OperatorPosture.Sprinting
+                    ? @operator.SprintSpeedMultiplier
+                    : @operator.MoveSpeedMultiplier;
+            }
+            targetSpeed = input.magnitude * baseSpeed * staminaMultiplier * operatorMoveScale;
             if (physiology != null) targetSpeed *= physiology.MovementFactor;
             if (inventory != null) targetSpeed *= Mathf.Lerp(1f, 0.72f, inventory.LoadRatio);
             if (movement != null) targetSpeed *= movement.SpeedFactor * movement.TerrainSpeedFactor;

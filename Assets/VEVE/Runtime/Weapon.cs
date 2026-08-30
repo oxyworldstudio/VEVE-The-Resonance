@@ -1,5 +1,7 @@
 using UnityEngine;
 using VEVE.Realism;
+using VEVE.Catalog;
+using VEVE.WeaponCustomPro;
 
 namespace VEVE
 {
@@ -28,11 +30,15 @@ namespace VEVE
         [SerializeField] private float latitude = 0f;
         [SerializeField] private LayerMask hitMask = Physics.DefaultRaycastLayers;
         [SerializeField] private RealismConfig realismConfig;
+        [SerializeField] private WeaponInstanceIdentity identity;
         private int rounds;
         private float nextShot;
         private float recoil;
         private bool malfunctioned;
         private Maintenance maintenance;
+        private VEVE.Operators.OperatorInstance @operator;
+        private RangeCard card;
+        private double turretMoa;
 
         private void Awake()
         {
@@ -46,11 +52,48 @@ namespace VEVE
             }
             rounds = magazineSize;
             maintenance = GetComponent<Maintenance>();
+            @operator = GetComponentInParent<VEVE.Operators.OperatorInstance>();
+            if (@operator != null && identity == null) identity = @operator.Identity;
+            ResolveRangeCard();
+        }
+
+        /// <summary>
+        /// Bakes the battle-zero range card when a catalogued weapon id can be resolved — either
+        /// from the serialized identity, or from a definition whose weapon name matches a catalog
+        /// id or display name — and the definition carries zeroing geometry. Null leaves the fire
+        /// loop on the pure line-of-sight path.
+        /// </summary>
+        private void ResolveRangeCard()
+        {
+            card = null;
+            turretMoa = 0.0;
+            string weaponId = identity != null && IconicWeaponCatalog.TryGet(identity.weaponId, out _)
+                ? identity.weaponId
+                : (definition != null ? ResolveCatalogIdByName(definition.weaponName) : null);
+            if (weaponId == null || definition == null || definition.zeroRange <= 0f) return;
+            if (!ZeroingSystem.TryComputeCard(weaponId, definition.zeroRange, definition.sightHeight * 1000f, out RangeCard computed)) return;
+            card = computed;
+            turretMoa = identity != null ? identity.zeroClicksElevation * card.ClickValueMoa : 0.0;
+        }
+
+        private static string ResolveCatalogIdByName(string weaponName)
+        {
+            if (string.IsNullOrEmpty(weaponName)) return null;
+            foreach (WeaponSpec spec in IconicWeaponCatalog.All)
+            {
+                if (string.Equals(spec.id, weaponName, System.StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(spec.displayName, weaponName, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    return spec.id;
+                }
+            }
+            return null;
         }
 
         private void Update()
         {
-            recoil = Mathf.MoveTowards(recoil, 0f, recoilRecovery * Time.deltaTime);
+            float recoveryScale = @operator != null ? @operator.SwayRecoveryMultiplier : 1f;
+            recoil = Mathf.MoveTowards(recoil, 0f, recoilRecovery * Mathf.Max(0.25f, recoveryScale) * Time.deltaTime);
             if (Input.GetKeyDown(KeyCode.R)) { rounds = magazineSize; malfunctioned = false; }
             if (!malfunctioned && Input.GetButton("Fire1") && Time.time >= nextShot) Fire();
         }
@@ -72,6 +115,10 @@ namespace VEVE
             if (fouling + wear >= (definition != null ? definition.malfunctionThreshold : 1.25f)) { malfunctioned = true; return; }
             RaycastHit[] hits = Physics.RaycastAll(aimCamera.transform.position, aimCamera.transform.forward, 150f, hitMask);
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+            for (int i = 0; i < hits.Length; i++)
+            {
+                hits[i] = ApplyZeroingHoldover(hits[i]);
+            }
             float remainingEnergy = muzzleEnergy;
             foreach (RaycastHit hit in hits)
             {
@@ -132,6 +179,28 @@ namespace VEVE
                 }
                 if (!absorbed) break;
             }
+        }
+
+        /// <summary>
+        /// Shifts a raw line-of-sight hit onto the actual round path implied by the zeroed
+        /// trajectory at that distance: <see cref="ZeroingSystem.ComputeHoldoverMoa(RangeCard,double)"/>
+        /// is an aim-side angle (+ = aim above the target), so the bullet path deviates by the
+        /// negated angle about the camera right axis, then the corrected ray is re-cast once and
+        /// its hit is used for damage. Neutral when no range card was resolved.
+        /// </summary>
+        private RaycastHit ApplyZeroingHoldover(RaycastHit raw)
+        {
+            if (card == null || aimCamera == null) return raw;
+            double holdoverMoa = ZeroingSystem.ComputeHoldoverMoa(card, raw.distance) + turretMoa;
+            if (holdoverMoa == 0.0) return raw;
+            float angleRad = (float)(-holdoverMoa * System.Math.PI / 10800.0);
+            Vector3 direction = Quaternion.AngleAxis(angleRad, aimCamera.transform.right) * aimCamera.transform.forward;
+            if (Physics.Raycast(aimCamera.transform.position, direction, out RaycastHit corrected, 150f, hitMask)
+                && !corrected.collider.transform.IsChildOf(transform))
+            {
+                return corrected;
+            }
+            return raw;
         }
 
         public int RoundsRemaining => rounds;

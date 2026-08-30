@@ -72,6 +72,7 @@ namespace VEVE.Editor
             player.AddComponent<VEVE.RealisticPhysics.GroundContactProbe>();
             player.AddComponent<VEVE.RealisticPhysics.TerminalVelocityFallingSystem>();
             player.AddComponent<VEVE.Gear.DamageableGearAdapter>();
+            player.AddComponent<VEVE.Operators.OperatorInstance>();
             
             SerializedObject coordinatorData = new SerializedObject(coordinator);
             coordinatorData.FindProperty("environment").objectReferenceValue = environmentSimulation;
@@ -171,6 +172,10 @@ namespace VEVE.Editor
             interfaceObject.AddComponent<VEVE.UI.InventoryUIController>();
             interfaceObject.AddComponent<VEVE.UI.MainMenuFlowController>();
             interfaceObject.AddComponent<VEVE.UI.Personalization.PersonalizationWorkspace>();
+            interfaceObject.AddComponent<VEVE.UI.Personalization.PersonalizationBinder>();
+
+            GameObject dashboardObject = new GameObject("DebugDashboard");
+            dashboardObject.AddComponent<VEVE.Diagnostics.DebugDashboardOverlay>();
 
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), "Assets/Scenes/VEVE_Milestone1.unity");
             AssetDatabase.SaveAssets();
