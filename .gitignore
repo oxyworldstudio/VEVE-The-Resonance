@@ -39,3 +39,6 @@ My project*/
 
 test-results-*.xml
 *.log
+
+/*.dll
+/*.rsp
