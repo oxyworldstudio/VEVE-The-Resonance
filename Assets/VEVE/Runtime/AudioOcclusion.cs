@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace VEVE
 {
+    /// <summary>
+    /// Deprecated: Use VEVE.Audio.AudioOcclusion instead.
+    /// </summary>
     [RequireComponent(typeof(AudioSource))]
     public sealed class AudioOcclusion : MonoBehaviour
     {

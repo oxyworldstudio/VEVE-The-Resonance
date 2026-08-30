@@ -3,6 +3,9 @@ using VEVE.Realism;
 
 namespace VEVE
 {
+    /// <summary>
+    /// Deprecated: Use VEVE.Audio.AdvancedSoundPropagation instead.
+    /// </summary>
     public sealed class AdvancedSoundPropagation : MonoBehaviour
     {
         [SerializeField] private RealismConfig realismConfig;
