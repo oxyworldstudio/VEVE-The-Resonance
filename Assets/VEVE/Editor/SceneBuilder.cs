@@ -71,6 +71,7 @@ namespace VEVE.Editor
             player.AddComponent<VEVE.RealisticPhysics.CharacterMassModel>();
             player.AddComponent<VEVE.RealisticPhysics.GroundContactProbe>();
             player.AddComponent<VEVE.RealisticPhysics.TerminalVelocityFallingSystem>();
+            player.AddComponent<VEVE.Gear.DamageableGearAdapter>();
             
             SerializedObject coordinatorData = new SerializedObject(coordinator);
             coordinatorData.FindProperty("environment").objectReferenceValue = environmentSimulation;
@@ -116,6 +117,7 @@ namespace VEVE.Editor
             enemy.transform.position = new Vector3(0, 1, 15); 
             enemy.GetComponent<Renderer>().sharedMaterial = concrete;
             Damageable damageable = enemy.AddComponent<Damageable>();
+            enemy.AddComponent<VEVE.Gear.DamageableGearAdapter>();
             EnemyAwareness awareness = enemy.AddComponent<EnemyAwareness>();
             SerializedObject aiData = new SerializedObject(awareness); 
             aiData.FindProperty("target").objectReferenceValue = player.transform; 
@@ -168,6 +170,7 @@ namespace VEVE.Editor
             interfaceObject.AddComponent<VEVE.UI.AdvancedHUDLayout>();
             interfaceObject.AddComponent<VEVE.UI.InventoryUIController>();
             interfaceObject.AddComponent<VEVE.UI.MainMenuFlowController>();
+            interfaceObject.AddComponent<VEVE.UI.Personalization.PersonalizationWorkspace>();
 
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), "Assets/Scenes/VEVE_Milestone1.unity");
             AssetDatabase.SaveAssets();

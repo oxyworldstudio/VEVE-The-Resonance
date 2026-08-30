@@ -161,33 +161,35 @@ namespace VEVE.Customization
             return true;
         }
 
+        private static float Neutralize(float modifier)
+        {
+            return modifier > 0f ? modifier : 1f;
+        }
+
         public float CalculateModifiedAccuracy(string weaponId, float baseAccuracy)
         {
             var state = GetState(weaponId);
-            float modifier = 1.0f;
-            modifier *= GetAttachmentModifier(state.equippedOptic, a => a.accuracyModifier);
-            modifier *= GetAttachmentModifier(state.equippedMuzzle, a => a.accuracyModifier);
-            modifier *= GetAttachmentModifier(state.equippedGrip, a => a.accuracyModifier);
-            modifier *= GetAttachmentModifier(state.equippedStock, a => a.accuracyModifier);
+            float modifier = Neutralize(GetAttachmentModifier(state.equippedOptic, a => a.accuracyModifier));
+            modifier *= Neutralize(GetAttachmentModifier(state.equippedMuzzle, a => a.accuracyModifier));
+            modifier *= Neutralize(GetAttachmentModifier(state.equippedGrip, a => a.accuracyModifier));
+            modifier *= Neutralize(GetAttachmentModifier(state.equippedStock, a => a.accuracyModifier));
             return baseAccuracy * modifier;
         }
 
         public float CalculateModifiedRecoil(string weaponId, float baseRecoil)
         {
             var state = GetState(weaponId);
-            float modifier = 1.0f;
-            modifier *= GetAttachmentModifier(state.equippedMuzzle, a => a.recoilModifier);
-            modifier *= GetAttachmentModifier(state.equippedGrip, a => a.recoilModifier);
-            modifier *= GetAttachmentModifier(state.equippedStock, a => a.recoilModifier);
+            float modifier = Neutralize(GetAttachmentModifier(state.equippedMuzzle, a => a.recoilModifier));
+            modifier *= Neutralize(GetAttachmentModifier(state.equippedGrip, a => a.recoilModifier));
+            modifier *= Neutralize(GetAttachmentModifier(state.equippedStock, a => a.recoilModifier));
             return baseRecoil * modifier;
         }
 
         public float CalculateModifiedRange(string weaponId, float baseRange)
         {
             var state = GetState(weaponId);
-            float modifier = 1.0f;
-            modifier *= GetAttachmentModifier(state.equippedOptic, a => a.rangeModifier);
-            modifier *= GetAttachmentModifier(state.equippedBarrel, a => a.rangeModifier);
+            float modifier = Neutralize(GetAttachmentModifier(state.equippedOptic, a => a.rangeModifier));
+            modifier *= Neutralize(GetAttachmentModifier(state.equippedBarrel, a => a.rangeModifier));
             return baseRange * modifier;
         }
 

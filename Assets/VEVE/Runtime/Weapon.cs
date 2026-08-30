@@ -108,7 +108,26 @@ namespace VEVE
                 if (target != null && remainingEnergy >= 0f && absorbed)
                 {
                     float energyRatio = Mathf.Clamp01(remainingEnergy / muzzleEnergy);
-                    target.ApplyDamage(damage * energyRatio, hit.collider.name.ToLowerInvariant().Contains("head") ? HitZone.Head : HitZone.UpperTorso);
+                    float appliedDamage = damage * energyRatio;
+                    HitZone zone = hit.collider.name.ToLowerInvariant().Contains("head") ? HitZone.Head : HitZone.UpperTorso;
+                    float bulletMass = definition != null ? definition.bulletMass : 0.01f;
+                    VEVE.Gear.DamageableGearAdapter adapter = hit.collider.GetComponentInParent<VEVE.Gear.DamageableGearAdapter>();
+                    if (adapter != null)
+                    {
+                        float impactVelocity = Mathf.Sqrt(2f * remainingEnergy / Mathf.Max(bulletMass, 0.0005f));
+                        float impactAngle = Vector3.Angle(-hit.normal, aimCamera.transform.forward);
+                        VEVE.Gear.GearMitigationResult mitigation = default;
+                        if (adapter.MitigateHit(remainingEnergy, impactVelocity, zone, impactAngle, ref mitigation))
+                        {
+                            appliedDamage *= mitigation.damageScale;
+                            if (mitigation.stopped)
+                            {
+                                target.GetComponent<Physiology>()?.ApplyWound(
+                                    mitigation.traumaEnergyJoules * 0.02f, mitigation.traumaEnergyJoules * 0.05f);
+                            }
+                        }
+                    }
+                    target.ApplyDamage(appliedDamage, zone);
                     break;
                 }
                 if (!absorbed) break;
