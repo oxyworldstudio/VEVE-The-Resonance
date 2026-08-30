@@ -36,3 +36,6 @@ Thumbs.db
 My project*/
 .crash/
 *.log.*
+
+test-results-*.xml
+*.log

@@ -68,6 +68,9 @@ namespace VEVE.Editor
             player.AddComponent<CampaignState>();
             player.AddComponent<FieldMedic>();
             player.AddComponent<PlayerController>();
+            player.AddComponent<VEVE.RealisticPhysics.CharacterMassModel>();
+            player.AddComponent<VEVE.RealisticPhysics.GroundContactProbe>();
+            player.AddComponent<VEVE.RealisticPhysics.TerminalVelocityFallingSystem>();
             
             SerializedObject coordinatorData = new SerializedObject(coordinator);
             coordinatorData.FindProperty("environment").objectReferenceValue = environmentSimulation;
@@ -152,7 +155,20 @@ namespace VEVE.Editor
             
             GameObject audioObject = new GameObject("AdvancedAudio");
             audioObject.AddComponent<AudioSource>();
-            
+
+            GameObject agentSystemObject = new GameObject("MultiAgentSystem");
+            agentSystemObject.AddComponent<VEVE.Agentic.MultiAgentSystemManager>();
+            agentSystemObject.AddComponent<VEVE.Agentic.CoordinatorAgent>();
+
+            GameObject fidelityObject = new GameObject("RenderFidelity");
+            fidelityObject.AddComponent<VEVE.Graphics.ProceduralSurfaceTextureFactory>();
+            fidelityObject.AddComponent<VEVE.Graphics.DynamicReflectionController>();
+
+            GameObject interfaceObject = new GameObject("AAAInterface");
+            interfaceObject.AddComponent<VEVE.UI.AdvancedHUDLayout>();
+            interfaceObject.AddComponent<VEVE.UI.InventoryUIController>();
+            interfaceObject.AddComponent<VEVE.UI.MainMenuFlowController>();
+
             EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), "Assets/Scenes/VEVE_Milestone1.unity");
             AssetDatabase.SaveAssets();
         }
