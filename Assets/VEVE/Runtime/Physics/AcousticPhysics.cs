@@ -32,11 +32,9 @@ namespace VEVE.RealisticPhysics
         public static float CalculateDopplerShift(float sourceVelocity, float listenerVelocity, float frequency, float speedOfSound = 343f)
         {
             float relativeVelocity = sourceVelocity - listenerVelocity;
-            if (relativeVelocity >= speedOfSound)
-            {
-                return frequency * (speedOfSound / (speedOfSound - relativeVelocity));
-            }
-            return frequency * (speedOfSound / (speedOfSound - relativeVelocity));
+            if (Mathf.Approximately(speedOfSound, 0f)) return frequency;
+            float observed = frequency * (speedOfSound / (speedOfSound - relativeVelocity));
+            return Mathf.Clamp(observed, 0f, frequency * 4f);
         }
 
         public static float CalculateSonicBoom(float velocity, float speedOfSound = 343f)
@@ -55,7 +53,7 @@ namespace VEVE.RealisticPhysics
 
         public static float CalculateMaterialTransmissionLoss(float materialThickness, float materialDensity, float frequency)
         {
-            float transmissionLoss = 20f * Mathf.Log10(frequency * materialDensity * materialThickness * 0.001f);
+            float transmissionLoss = 20f * Mathf.Log10(frequency * materialDensity * materialThickness * 0.001f + 1e-10f);
             return Mathf.Clamp(transmissionLoss, 0f, 100f);
         }
 
@@ -67,6 +65,7 @@ namespace VEVE.RealisticPhysics
 
         public static float CalculateSoundPressureLevel(float intensity, float referenceIntensity = 1e-12f)
         {
+            if (intensity <= 0f) return -100f;
             return 10f * Mathf.Log10(intensity / referenceIntensity);
         }
 
@@ -78,7 +77,7 @@ namespace VEVE.RealisticPhysics
         public static float CalculateSoundReductionIndex(float frequency, float materialDensity, float thickness)
         {
             float massPerArea = materialDensity * thickness;
-            return 20f * Mathf.Log10(frequency * massPerArea * 0.01f);
+            return 20f * Mathf.Log10(frequency * massPerArea * 0.01f + 1e-10f);
         }
 
         public static SoundWaveState SimulateWavePropagation(SoundWaveState state, float deltaTime, float airDensity, float humidity, float temperature)
@@ -119,6 +118,34 @@ namespace VEVE.RealisticPhysics
         {
             float attenuation = 1f / (1f + distance * distance * 0.02f);
             return sourceIntensity * attenuation * Mathf.Pow(reflectionCoefficient, reflections);
+        }
+
+        public static float CalculateWindEffect(float windSpeed, Vector3 windDirection, Vector3 soundDirection)
+        {
+            if (windSpeed <= 0f) return 0f;
+            float dot = Vector3.Dot(windDirection.normalized, soundDirection.normalized);
+            return windSpeed * dot * 0.01f;
+        }
+
+        public static float CalculateAtmosphericAttenuation(float distance, float frequency, float humidity, float temperature, float pressure)
+        {
+            float attenuationCoefficient = CalculateAtmosphericAttenuationCoefficient(frequency, humidity, temperature, pressure);
+            return Mathf.Exp(-attenuationCoefficient * distance);
+        }
+
+        private static float CalculateAtmosphericAttenuationCoefficient(float frequency, float humidity, float temperature, float pressure)
+        {
+            float tempKelvin = temperature + 273.15f;
+            float pressureRatio = pressure / 101325f;
+            return 0.0001f * frequency * humidity * pressureRatio / tempKelvin;
+        }
+
+        public static float CalculateDopplerForRotatingSource(Vector3 sourcePosition, Vector3 sourceVelocity, Vector3 listenerPosition, Vector3 listenerVelocity, float frequency, float speedOfSound = 343f)
+        {
+            Vector3 relativePosition = listenerPosition - sourcePosition;
+            Vector3 relativeVelocity = listenerVelocity - sourceVelocity;
+            float radialVelocity = Vector3.Dot(relativeVelocity, relativePosition.normalized);
+            return CalculateDopplerShift(radialVelocity, 0f, frequency, speedOfSound);
         }
     }
 }

@@ -11,10 +11,10 @@ public sealed class DamageableTests
         try
         {
             Damageable damageable = owner.AddComponent<Damageable>();
-            damageable.ApplyDamage(25f, HitZone.Torso);
+            damageable.ApplyDamage(25f, HitZone.UpperTorso);
             Assert.AreEqual(75f, damageable.TorsoIntegrity);
             Assert.IsFalse(damageable.IsDisabled);
-            damageable.ApplyDamage(75f, HitZone.Torso);
+            damageable.ApplyDamage(75f, HitZone.UpperTorso);
             Assert.IsTrue(damageable.IsDisabled);
         }
         finally

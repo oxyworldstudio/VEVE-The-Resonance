@@ -5,7 +5,7 @@ namespace VEVE
 {
     public sealed class RenderingRealism : MonoBehaviour
     {
-        [SerializeField] private RealismConfig realismConfig;
+        [SerializeField] private VEVE.Realism.RealismConfig realismConfig;
 
         private void Start()
         {

@@ -15,6 +15,11 @@ namespace VEVE.Mission
     public enum ObjectiveStatus { Inactive, Active, Completed, Failed, Hidden }
 
     /// <summary>
+    /// Types of objective markers displayed in the world and on the map.
+    /// </summary>
+    public enum ObjectiveMarkerType { Waypoint, Area, Target, Extraction, Hostile, Intel }
+
+    /// <summary>
     /// A single condition required to complete an objective.
     /// </summary>
     [Serializable]
@@ -99,7 +104,86 @@ namespace VEVE.Mission
     public enum RewardType { Currency, Experience, Item, Unlock, Score }
 
     /// <summary>
-    /// A mission objective with conditions, rewards, and completion tracking.
+    /// A waypoint associated with an objective marker.
+    /// </summary>
+    [Serializable]
+    public sealed class ObjectiveWaypoint
+    {
+        /// <summary>
+        /// Unique identifier for the waypoint.
+        /// </summary>
+        public string waypointId;
+
+        /// <summary>
+        /// World position of the waypoint.
+        /// </summary>
+        public Vector3 position;
+
+        /// <summary>
+        /// Display name of the waypoint.
+        /// </summary>
+        public string displayName;
+
+        /// <summary>
+        /// Sequence index for ordered waypoints.
+        /// </summary>
+        public int sequenceIndex;
+
+        /// <summary>
+        /// Indicates whether the waypoint is currently active.
+        /// </summary>
+        public bool isActive;
+
+        /// <summary>
+        /// Indicates whether the waypoint has been reached.
+        /// </summary>
+        public bool isReached;
+    }
+
+    /// <summary>
+    /// World-space marker configuration for an objective.
+    /// </summary>
+    [Serializable]
+    public sealed class ObjectiveMarker
+    {
+        /// <summary>
+        /// Unique identifier for the marker.
+        /// </summary>
+        public string markerId;
+
+        /// <summary>
+        /// Classification of the marker.
+        /// </summary>
+        public ObjectiveMarkerType markerType;
+
+        /// <summary>
+        /// World position of the marker.
+        /// </summary>
+        public Vector3 position;
+
+        /// <summary>
+        /// Radius of the area marker, if applicable.
+        /// </summary>
+        public float areaRadius;
+
+        /// <summary>
+        /// Indicates whether the marker is visible on the minimap.
+        /// </summary>
+        public bool visibleOnMinimap;
+
+        /// <summary>
+        /// Indicates whether the marker is visible on the world map.
+        /// </summary>
+        public bool visibleOnWorldMap;
+
+        /// <summary>
+        /// Waypoints associated with this marker.
+        /// </summary>
+        public List<ObjectiveWaypoint> waypoints;
+    }
+
+    /// <summary>
+    /// A mission objective with conditions, rewards, markers, and completion tracking.
     /// </summary>
     [Serializable]
     public sealed class MissionObjective
@@ -155,6 +239,16 @@ namespace VEVE.Mission
         public float timeoutDuration;
 
         /// <summary>
+        /// World-space marker for this objective.
+        /// </summary>
+        public ObjectiveMarker marker;
+
+        /// <summary>
+        /// Overall completion progress from 0 to 1.
+        /// </summary>
+        public float completionProgress;
+
+        /// <summary>
         /// Indicates whether the objective timer has expired.
         /// </summary>
         public bool IsTimedOut => timeoutDuration > 0f && Time.time > activationTime + timeoutDuration;
@@ -173,6 +267,15 @@ namespace VEVE.Mission
         {
             status = ObjectiveStatus.Active;
             activationTime = Time.time;
+            completionProgress = 0f;
+            if (marker != null && marker.waypoints != null)
+            {
+                foreach (var waypoint in marker.waypoints)
+                {
+                    waypoint.isActive = false;
+                    waypoint.isReached = false;
+                }
+            }
             foreach (ObjectiveCondition condition in conditions)
             {
                 condition.currentValue = 0f;
@@ -191,6 +294,7 @@ namespace VEVE.Mission
                 if (condition.conditionId == conditionId)
                 {
                     condition.currentValue = Mathf.Min(condition.requiredValue, condition.currentValue + amount);
+                    UpdateCompletionProgress();
                     break;
                 }
             }
@@ -208,6 +312,7 @@ namespace VEVE.Mission
                 if (condition.conditionId == conditionId)
                 {
                     condition.currentValue = Mathf.Clamp(value, 0f, condition.requiredValue);
+                    UpdateCompletionProgress();
                     break;
                 }
             }
@@ -237,6 +342,7 @@ namespace VEVE.Mission
             if (status == ObjectiveStatus.Active)
             {
                 status = ObjectiveStatus.Completed;
+                completionProgress = 1f;
             }
         }
 
@@ -248,6 +354,31 @@ namespace VEVE.Mission
             if (status == ObjectiveStatus.Active)
             {
                 status = ObjectiveStatus.Failed;
+                completionProgress = 0f;
+            }
+        }
+
+        /// <summary>
+        /// Updates the overall completion progress based on condition states.
+        /// </summary>
+        private void UpdateCompletionProgress()
+        {
+            if (conditions == null || conditions.Count == 0)
+            {
+                completionProgress = 0f;
+                return;
+            }
+
+            float total = 0f;
+            foreach (ObjectiveCondition condition in conditions)
+            {
+                total += Mathf.Clamp01(condition.currentValue / Mathf.Max(condition.requiredValue, 0.01f));
+            }
+            completionProgress = total / conditions.Count;
+
+            if (completionProgress >= 1f && status == ObjectiveStatus.Active)
+            {
+                Complete();
             }
         }
     }

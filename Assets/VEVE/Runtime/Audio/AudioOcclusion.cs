@@ -23,6 +23,14 @@ namespace VEVE.Audio
             [SerializeField] private float highpassOccluded = 20f;
             [SerializeField] private float highpassClear = 20f;
 
+            [Header("DSP Blending")]
+            [SerializeField] private float reverbWetOccluded = 0.8f;
+            [SerializeField] private float reverbWetClear = 0.2f;
+            [SerializeField] private float distortionOccluded = 0.3f;
+            [SerializeField] private float distortionClear = 0f;
+            [SerializeField] private float chorusOccluded = 0.4f;
+            [SerializeField] private float chorusClear = 0f;
+
             public float OccludedVolume { get { return occludedVolume; } }
             public float QueryInterval { get { return queryInterval; } }
             public float LerpSpeed { get { return lerpSpeed; } }
@@ -30,6 +38,12 @@ namespace VEVE.Audio
             public float LowpassClear { get { return lowpassClear; } }
             public float HighpassOccluded { get { return highpassOccluded; } }
             public float HighpassClear { get { return highpassClear; } }
+            public float ReverbWetOccluded { get { return reverbWetOccluded; } }
+            public float ReverbWetClear { get { return reverbWetClear; } }
+            public float DistortionOccluded { get { return distortionOccluded; } }
+            public float DistortionClear { get { return distortionClear; } }
+            public float ChorusOccluded { get { return chorusOccluded; } }
+            public float ChorusClear { get { return chorusClear; } }
         }
 
         [Header("References")]
@@ -40,6 +54,8 @@ namespace VEVE.Audio
         private AudioSource source;
         private AudioLowPassFilter lowpassFilter;
         private AudioHighPassFilter highpassFilter;
+        private AudioDistortionFilter distortionFilter;
+        private AudioChorusFilter chorusFilter;
         private float nextQuery;
         private float targetOcclusion;
         private bool wasOccluded;
@@ -56,6 +72,16 @@ namespace VEVE.Audio
             if (highpassFilter == null)
             {
                 highpassFilter = gameObject.AddComponent<AudioHighPassFilter>();
+            }
+            distortionFilter = GetComponent<AudioDistortionFilter>();
+            if (distortionFilter == null)
+            {
+                distortionFilter = gameObject.AddComponent<AudioDistortionFilter>();
+            }
+            chorusFilter = GetComponent<AudioChorusFilter>();
+            if (chorusFilter == null)
+            {
+                chorusFilter = gameObject.AddComponent<AudioChorusFilter>();
             }
         }
 
@@ -86,12 +112,19 @@ namespace VEVE.Audio
             float targetVolume = blocked ? profile.OccludedVolume : 1f;
             float targetLowpass = blocked ? profile.LowpassOccluded : profile.LowpassClear;
             float targetHighpass = blocked ? profile.HighpassOccluded : profile.HighpassClear;
+            float targetDistortion = blocked ? profile.DistortionOccluded : profile.DistortionClear;
+            float targetChorus = blocked ? profile.ChorusOccluded : profile.ChorusClear;
 
             source.volume = Mathf.MoveTowards(source.volume, targetVolume, profile.LerpSpeed * Time.unscaledDeltaTime);
             lowpassFilter.cutoffFrequency = Mathf.MoveTowards(lowpassFilter.cutoffFrequency, targetLowpass, profile.LerpSpeed * Time.unscaledDeltaTime);
             highpassFilter.cutoffFrequency = Mathf.MoveTowards(highpassFilter.cutoffFrequency, targetHighpass, profile.LerpSpeed * Time.unscaledDeltaTime);
+            distortionFilter.distortionLevel = Mathf.MoveTowards(distortionFilter.distortionLevel, targetDistortion, profile.LerpSpeed * Time.unscaledDeltaTime);
+            chorusFilter.dryMix = Mathf.MoveTowards(chorusFilter.dryMix, 1f - targetChorus, profile.LerpSpeed * Time.unscaledDeltaTime);
+            chorusFilter.wetMix1 = Mathf.MoveTowards(chorusFilter.wetMix1, targetChorus * 0.5f, profile.LerpSpeed * Time.unscaledDeltaTime);
+            chorusFilter.wetMix2 = Mathf.MoveTowards(chorusFilter.wetMix2, targetChorus * 0.5f, profile.LerpSpeed * Time.unscaledDeltaTime);
 
             mixerController?.SetOcclusion(targetOcclusion);
+            mixerController?.SetReverbWet(blocked ? profile.ReverbWetOccluded : profile.ReverbWetClear);
         }
 
         private float GetMaterialAbsorption(RaycastHit hit)

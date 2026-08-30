@@ -14,6 +14,7 @@ namespace VEVE.Audio
         {
             [Header("Raycast")]
             [SerializeField] private int maxReflections = 4;
+            [SerializeField] private int raysPerSource = 16;
             [SerializeField] private float rayDistance = 100f;
             [SerializeField] private LayerMask occlusionLayers = Physics.DefaultRaycastLayers;
             [SerializeField] private float reflectionEnergyThreshold = 0.01f;
@@ -28,6 +29,7 @@ namespace VEVE.Audio
             [SerializeField] private float humidityAbsorption = 0.0005f;
 
             public int MaxReflections { get { return maxReflections; } }
+            public int RaysPerSource { get { return raysPerSource; } }
             public float RayDistance { get { return rayDistance; } }
             public LayerMask OcclusionLayers { get { return occlusionLayers; } }
             public float ReflectionEnergyThreshold { get { return reflectionEnergyThreshold; } }
@@ -36,6 +38,16 @@ namespace VEVE.Audio
             public float PropagationSpeed { get { return propagationSpeed; } }
             public float AirAbsorption { get { return airAbsorption; } }
             public float HumidityAbsorption { get { return humidityAbsorption; } }
+        }
+
+        [System.Serializable]
+        public struct PropagationResult
+        {
+            public float loudness;
+            public float delay;
+            public Vector3 hitPosition;
+            public SurfaceMaterial hitMaterial;
+            public int reflectionCount;
         }
 
         [Header("Settings")]
@@ -104,6 +116,78 @@ namespace VEVE.Audio
         public float CalculatePropagationDelay(float distance)
         {
             return distance / settings.PropagationSpeed;
+        }
+
+        public PropagationResult[] CalculatePropagation(Vector3 sourcePosition, float sourceLoudness)
+        {
+            var results = new System.Collections.Generic.List<PropagationResult>();
+            float remainingEnergy = sourceLoudness;
+            Vector3 currentOrigin = sourcePosition;
+            float currentDelay = 0f;
+
+            for (int reflection = 0; reflection < settings.MaxReflections; reflection++)
+            {
+                if (remainingEnergy < settings.ReflectionEnergyThreshold) break;
+
+                RaycastHit[] hits = CastPropagationRays(currentOrigin, settings.RaysPerSource);
+                foreach (RaycastHit hit in hits)
+                {
+                    float distance = Vector3.Distance(currentOrigin, hit.point);
+                    float absorption = GetAbsorptionForHit(hit);
+                    float energyAfterAbsorption = remainingEnergy * (1f - absorption);
+                    float reflectedEnergy = CalculateReflectionEnergy(energyAfterAbsorption, distance, absorption);
+
+                    results.Add(new PropagationResult
+                    {
+                        loudness = energyAfterAbsorption,
+                        delay = currentDelay + CalculatePropagationDelay(distance),
+                        hitPosition = hit.point,
+                        hitMaterial = GetMaterialForHit(hit),
+                        reflectionCount = reflection
+                    });
+
+                    remainingEnergy = reflectedEnergy;
+                    currentDelay += CalculatePropagationDelay(distance);
+                    currentOrigin = hit.point + hit.normal * 0.01f;
+                }
+            }
+
+            return results.ToArray();
+        }
+
+        private float GetAbsorptionForHit(RaycastHit hit)
+        {
+            var materialDef = hit.transform.GetComponent<MaterialDefinition>();
+            if (materialDef != null)
+            {
+                return materialDef.AcousticAbsorption;
+            }
+
+            return CalculateMaterialAbsorption(GetMaterialForHit(hit));
+        }
+
+        private SurfaceMaterial GetMaterialForHit(RaycastHit hit)
+        {
+            var materialDef = hit.transform.GetComponent<MaterialDefinition>();
+            if (materialDef != null)
+            {
+                return materialDef.MaterialType;
+            }
+
+            var renderer = hit.transform.GetComponent<Renderer>();
+            if (renderer != null && renderer.sharedMaterial != null)
+            {
+                string name = renderer.sharedMaterial.name.ToLowerInvariant();
+                if (name.Contains("wood")) return SurfaceMaterial.Wood;
+                if (name.Contains("concrete")) return SurfaceMaterial.Concrete;
+                if (name.Contains("metal")) return SurfaceMaterial.Metal;
+                if (name.Contains("glass")) return SurfaceMaterial.Glass;
+                if (name.Contains("fabric")) return SurfaceMaterial.Fabric;
+                if (name.Contains("dirt")) return SurfaceMaterial.Dirt;
+                if (name.Contains("ice")) return SurfaceMaterial.Ice;
+            }
+
+            return SurfaceMaterial.Concrete;
         }
     }
 }

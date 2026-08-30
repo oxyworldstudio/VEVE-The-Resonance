@@ -18,7 +18,7 @@ namespace VEVE.Mission
         /// <summary>
         /// Index of this choice within the parent node.
         /// </summary>
-        public int index;
+        public int choiceIndex;
 
         /// <summary>
         /// ID of the dialogue node to transition to when this choice is selected. Empty means end dialogue.
@@ -73,9 +73,9 @@ namespace VEVE.Mission
         public List<DialogueChoice> choices;
 
         /// <summary>
-        /// Audio clip name or path for voice-over, if any.
+        /// Audio clip reference for voice-over playback.
         /// </summary>
-        public string audioClip;
+        public AudioClip voiceOverClip;
 
         /// <summary>
         /// Duration in seconds before the dialogue auto-advances. Zero means manual advance only.
@@ -86,6 +86,11 @@ namespace VEVE.Mission
         /// Animation trigger name to play on the speaker when this node begins.
         /// </summary>
         public string animationTrigger;
+
+        /// <summary>
+        /// Subtitle display duration in seconds. Zero means display until next node.
+        /// </summary>
+        public float subtitleDuration;
 
         /// <summary>
         /// Indicates whether this node ends the dialogue sequence.
@@ -113,6 +118,53 @@ namespace VEVE.Mission
     }
 
     /// <summary>
+    /// Formatting configuration for subtitle display.
+    /// </summary>
+    [Serializable]
+    public sealed class SubtitleFormatting
+    {
+        /// <summary>
+        /// Name of the font asset to use for subtitles.
+        /// </summary>
+        public string fontName;
+
+        /// <summary>
+        /// Font size in points.
+        /// </summary>
+        public int fontSize;
+
+        /// <summary>
+        /// Color of the subtitle text.
+        /// </summary>
+        public Color textColor;
+
+        /// <summary>
+        /// Color of the subtitle outline.
+        /// </summary>
+        public Color outlineColor;
+
+        /// <summary>
+        /// Width of the subtitle outline in pixels.
+        /// </summary>
+        public int outlineWidth;
+
+        /// <summary>
+        /// Vertical offset from the bottom of the screen, in pixels.
+        /// </summary>
+        public int verticalOffset;
+
+        /// <summary>
+        /// Maximum width of a subtitle line in characters.
+        /// </summary>
+        public int maxLineLength;
+
+        /// <summary>
+        /// Indicates whether the speaker name should be displayed above the subtitle text.
+        /// </summary>
+        public bool showSpeakerName;
+    }
+
+    /// <summary>
     /// A sequence of dialogue nodes forming a branching conversation.
     /// </summary>
     [Serializable]
@@ -137,6 +189,16 @@ namespace VEVE.Mission
         /// ID of the node where the dialogue begins.
         /// </summary>
         public string startNodeId;
+
+        /// <summary>
+        /// Default formatting settings for subtitles in this sequence.
+        /// </summary>
+        public SubtitleFormatting subtitleFormatting;
+
+        /// <summary>
+        /// Audio mixer group for voice-over playback.
+        /// </summary>
+        public string audioMixerGroup;
 
         /// <summary>
         /// Retrieves a node by its ID.

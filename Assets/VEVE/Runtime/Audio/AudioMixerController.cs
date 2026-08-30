@@ -27,6 +27,10 @@ namespace VEVE.Audio
             [SerializeField] private float environmentSmoothTime = 0.2f;
             [SerializeField] private float environmentMax = 0.5f;
 
+            [Header("Snapshot")]
+            [SerializeField] private string snapshotParameter = "SnapshotBlend";
+            [SerializeField] private float snapshotTransitionDuration = 1f;
+
             public string OcclusionParameter { get { return occlusionParameter; } }
             public float OcclusionSmoothTime { get { return occlusionSmoothTime; } }
             public float OcclusionMax { get { return occlusionMax; } }
@@ -36,6 +40,18 @@ namespace VEVE.Audio
             public string EnvironmentParameter { get { return environmentParameter; } }
             public float EnvironmentSmoothTime { get { return environmentSmoothTime; } }
             public float EnvironmentMax { get { return environmentMax; } }
+            public string SnapshotParameter { get { return snapshotParameter; } }
+            public float SnapshotTransitionDuration { get { return snapshotTransitionDuration; } }
+        }
+
+        [System.Serializable]
+        public class SnapshotProfile
+        {
+            [SerializeField] private AudioMixerSnapshot snapshot;
+            [SerializeField] private float blendValue = 0f;
+
+            public AudioMixerSnapshot Snapshot => snapshot;
+            public float BlendValue { get { return blendValue; } set { blendValue = value; } }
         }
 
         [Header("Mixer Groups")]
@@ -47,14 +63,17 @@ namespace VEVE.Audio
         [Header("Configuration")]
         [SerializeField] private AudioPresetDefinition defaultPreset;
         [SerializeField] private MixerParameters parameters;
+        [SerializeField] private SnapshotProfile[] snapshotProfiles;
 
         private AudioPresetDefinition currentPreset;
         private float occlusionSmoothVelocity;
         private float dopplerSmoothVelocity;
         private float environmentSmoothVelocity;
+        private float snapshotSmoothVelocity;
         private float currentOcclusion;
         private float currentDoppler;
         private float currentEnvironment;
+        private float currentSnapshot;
 
         private void Start()
         {
@@ -72,10 +91,12 @@ namespace VEVE.Audio
             currentOcclusion = Mathf.SmoothDamp(currentOcclusion, GetTargetOcclusion(), ref occlusionSmoothVelocity, parameters.OcclusionSmoothTime);
             currentDoppler = Mathf.SmoothDamp(currentDoppler, GetTargetDoppler(), ref dopplerSmoothVelocity, parameters.DopplerSmoothTime);
             currentEnvironment = Mathf.SmoothDamp(currentEnvironment, GetTargetEnvironment(), ref environmentSmoothVelocity, parameters.EnvironmentSmoothTime);
+            currentSnapshot = Mathf.SmoothDamp(currentSnapshot, GetTargetSnapshot(), ref snapshotSmoothVelocity, parameters.SnapshotTransitionDuration);
 
             mixer.SetFloat(parameters.OcclusionParameter, currentOcclusion * parameters.OcclusionMax);
             mixer.SetFloat(parameters.DopplerParameter, currentDoppler * parameters.DopplerMax);
             mixer.SetFloat(parameters.EnvironmentParameter, currentEnvironment * parameters.EnvironmentMax);
+            mixer.SetFloat(parameters.SnapshotParameter, currentSnapshot);
         }
 
         public void ApplyPreset(AudioPresetDefinition preset)
@@ -101,6 +122,12 @@ namespace VEVE.Audio
             }
         }
 
+        public void TransitionToSnapshot(AudioMixerSnapshot snapshot, float duration)
+        {
+            if (snapshot == null) return;
+            snapshot.TransitionTo(duration);
+        }
+
         public void SetOcclusion(float occlusionFactor)
         {
             currentOcclusion = occlusionFactor;
@@ -114,6 +141,22 @@ namespace VEVE.Audio
         public void SetEnvironment(float environmentFactor)
         {
             currentEnvironment = environmentFactor;
+        }
+
+        public void SetReverbWet(float wetFactor)
+        {
+            if (masterGroup != null && masterGroup.audioMixer != null)
+            {
+                masterGroup.audioMixer.SetFloat("ReverbWet", Mathf.Clamp01(wetFactor));
+            }
+        }
+
+        public void DuckMusic(float duckAmount, float duration)
+        {
+            if (musicGroup != null && musicGroup.audioMixer != null)
+            {
+                musicGroup.audioMixer.SetFloat("MusicDuck", Mathf.Clamp01(duckAmount));
+            }
         }
 
         public AudioPresetDefinition GetCurrentPreset()
@@ -134,6 +177,11 @@ namespace VEVE.Audio
         private float GetTargetEnvironment()
         {
             return Mathf.Clamp01(currentEnvironment);
+        }
+
+        private float GetTargetSnapshot()
+        {
+            return Mathf.Clamp01(currentSnapshot);
         }
 
         private float DecibelToLinear(float db)

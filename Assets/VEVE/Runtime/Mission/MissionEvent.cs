@@ -7,7 +7,7 @@ namespace VEVE.Mission
     /// <summary>
     /// Types of triggers that can activate a mission event.
     /// </summary>
-    public enum TriggerType { Proximity, Timer, KillCount, ItemPickup, DialogueChoice, ObjectiveComplete, SceneEnter, Custom }
+    public enum TriggerType { Proximity, Timer, KillCount, ItemPickup, DialogueChoice, ObjectiveComplete, SceneEnter, Custom, AreaEnter, GlobalEvent, HealthThreshold, VehicleEnter }
 
     /// <summary>
     /// Configuration for a proximity-based trigger.
@@ -29,6 +29,62 @@ namespace VEVE.Mission
         /// Tag filter for valid trigger targets. Empty means any object.
         /// </summary>
         public string targetTag;
+    }
+
+    /// <summary>
+    /// Configuration for an area-based trigger using a collider volume.
+    /// </summary>
+    [Serializable]
+    public sealed class AreaTrigger
+    {
+        /// <summary>
+        /// Center position of the trigger volume.
+        /// </summary>
+        public Vector3 center;
+
+        /// <summary>
+        /// Size of the trigger volume.
+        /// </summary>
+        public Vector3 size;
+
+        /// <summary>
+        /// Tag filter for valid trigger targets. Empty means any object.
+        /// </summary>
+        public string targetTag;
+    }
+
+    /// <summary>
+    /// Configuration for a health threshold trigger.
+    /// </summary>
+    [Serializable]
+    public sealed class HealthThresholdTrigger
+    {
+        /// <summary>
+        /// Target entity ID to monitor.
+        /// </summary>
+        public string targetEntityId;
+
+        /// <summary>
+        /// Health percentage threshold that activates the trigger.
+        /// </summary>
+        public float thresholdPercentage;
+
+        /// <summary>
+        /// Indicates whether the trigger activates when health falls below the threshold.
+        /// </summary>
+        public bool belowThreshold;
+    }
+
+    /// <summary>
+    /// Configuration for a vehicle entry trigger.
+    /// </summary>
+    [Serializable]
+    public sealed class VehicleEnterTrigger
+    {
+        /// <summary>
+        /// ID of the vehicle that must be entered.
+        /// </summary>
+        public string vehicleId;
     }
 
     /// <summary>
@@ -107,7 +163,7 @@ namespace VEVE.Mission
     /// <summary>
     /// Types of consequence actions that can be executed.
     /// </summary>
-    public enum ConsequenceType { TriggerEvent, CompleteObjective, FailObjective, SpawnEntity, PlayDialogue, ShowBriefing, AddItem, RemoveItem, ModifyStat, EndMission, EnableTrigger, DisableTrigger }
+    public enum ConsequenceType { TriggerEvent, CompleteObjective, FailObjective, SpawnEntity, PlayDialogue, ShowBriefing, AddItem, RemoveItem, ModifyStat, EndMission, EnableTrigger, DisableTrigger, SetObjectiveMarker, PlaySound, SpawnParticle, ChangeWeather, LockDoor, UnlockDoor }
 
     /// <summary>
     /// A single consequence action to execute.
@@ -183,6 +239,21 @@ namespace VEVE.Mission
         public ProximityTrigger proximityTrigger;
 
         /// <summary>
+        /// Area trigger configuration.
+        /// </summary>
+        public AreaTrigger areaTrigger;
+
+        /// <summary>
+        /// Health threshold trigger configuration.
+        /// </summary>
+        public HealthThresholdTrigger healthTrigger;
+
+        /// <summary>
+        /// Vehicle enter trigger configuration.
+        /// </summary>
+        public VehicleEnterTrigger vehicleTrigger;
+
+        /// <summary>
         /// Timer trigger configuration.
         /// </summary>
         public TimerTrigger timerTrigger;
@@ -237,6 +308,25 @@ namespace VEVE.Mission
         }
 
         /// <summary>
+        /// Evaluates whether the area trigger condition is met.
+        /// </summary>
+        /// <param name="position">The position to test.</param>
+        /// <returns>True if the position is inside the area volume; otherwise false.</returns>
+        public bool EvaluateArea(Vector3 position)
+        {
+            if (triggerType != TriggerType.AreaEnter || areaTrigger == null)
+            {
+                return false;
+            }
+            Vector3 halfSize = areaTrigger.size * 0.5f;
+            Vector3 min = areaTrigger.center - halfSize;
+            Vector3 max = areaTrigger.center + halfSize;
+            return position.x >= min.x && position.x <= max.x &&
+                   position.y >= min.y && position.y <= max.y &&
+                   position.z >= min.z && position.z <= max.z;
+        }
+
+        /// <summary>
         /// Evaluates whether the timer trigger condition is met based on elapsed time.
         /// </summary>
         /// <param name="elapsedTime">Time elapsed since the mission started, in seconds.</param>
@@ -276,6 +366,22 @@ namespace VEVE.Mission
                 return false;
             }
             return inventory.HasItem(itemTrigger.itemId);
+        }
+
+        /// <summary>
+        /// Evaluates whether the health threshold trigger condition is met.
+        /// </summary>
+        /// <param name="currentHealth">Current health value of the target entity.</param>
+        /// <param name="maxHealth">Maximum health value of the target entity.</param>
+        /// <returns>True if the health condition is satisfied; otherwise false.</returns>
+        public bool EvaluateHealthThreshold(float currentHealth, float maxHealth)
+        {
+            if (triggerType != TriggerType.HealthThreshold || healthTrigger == null || maxHealth <= 0f)
+            {
+                return false;
+            }
+            float percentage = currentHealth / maxHealth;
+            return healthTrigger.belowThreshold ? percentage <= healthTrigger.thresholdPercentage : percentage >= healthTrigger.thresholdPercentage;
         }
 
         /// <summary>

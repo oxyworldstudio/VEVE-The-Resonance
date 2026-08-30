@@ -32,6 +32,12 @@ namespace VEVE.Audio
         [SerializeField, Range(0f, 100f)] private float density = 50f;
         [SerializeField, Range(0f, 100f)] private float diffusion = 50f;
 
+        [Header("Atmosphere")]
+        [SerializeField] private float windLevel = 0f;
+        [SerializeField] private float precipitationLevel = 0f;
+        [SerializeField] private float temperatureCelsius = 20f;
+        [SerializeField] private float humidity = 0.5f;
+
         public AudioReverbPreset ReverbPreset { get { return reverbPreset; } set { reverbPreset = value; } }
         public float ReverbLevel { get { return reverbLevel; } set { reverbLevel = value; } }
         public float ReverbDecayTime { get { return reverbDecayTime; } set { reverbDecayTime = value; } }
@@ -50,6 +56,10 @@ namespace VEVE.Audio
         public float DecayTime { get { return decayTime; } set { decayTime = value; } }
         public float Density { get { return density; } set { density = value; } }
         public float Diffusion { get { return diffusion; } set { diffusion = value; } }
+        public float WindLevel { get { return windLevel; } set { windLevel = value; } }
+        public float PrecipitationLevel { get { return precipitationLevel; } set { precipitationLevel = value; } }
+        public float TemperatureCelsius { get { return temperatureCelsius; } set { temperatureCelsius = value; } }
+        public float Humidity { get { return humidity; } set { humidity = value; } }
 
         public void Apply(AudioReverbZone zone)
         {
@@ -104,11 +114,13 @@ namespace VEVE.Audio
 
         [Header("Blending")]
         [SerializeField] private float blendSpeed = 2f;
+        [SerializeField] private float transitionSmoothTime = 0.5f;
 
         private AudioEnvironmentPreset currentPreset;
         private AudioEnvironmentPreset targetPreset;
         private float blendProgress = 1f;
         private bool isInterior;
+        private float blendSmoothVelocity;
 
         private void Start()
         {
@@ -125,9 +137,11 @@ namespace VEVE.Audio
 
             if (blendProgress < 1f)
             {
-                blendProgress = Mathf.MoveTowards(blendProgress, 1f, blendSpeed * Time.unscaledDeltaTime);
+                blendProgress = Mathf.SmoothDamp(blendProgress, 1f, ref blendSmoothVelocity, transitionSmoothTime);
                 ApplyBlendedPreset();
             }
+
+            ApplyEnvironmentalDampening();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -152,6 +166,7 @@ namespace VEVE.Audio
                     isInterior = inside;
                     targetPreset = isInterior ? transition.Interior : transition.Exterior;
                     blendProgress = 0f;
+                    blendSmoothVelocity = 0f;
 
                     if (isInterior && transition.InteriorSnapshot != null)
                     {
@@ -172,7 +187,7 @@ namespace VEVE.Audio
 
         private void ApplyBlendedPreset()
         {
-            float t = Mathf.SmoothStep(0f, 1f, blendProgress);
+            float t = Mathf.Clamp01(blendProgress);
             var blended = BlendPreset(currentPreset, targetPreset, t);
             blended.ApplyToMixer(mixer, reverbMixerParameter);
         }
@@ -192,6 +207,10 @@ namespace VEVE.Audio
             blended.DecayTime = Mathf.Lerp(from.DecayTime, to.DecayTime, t);
             blended.Density = Mathf.Lerp(from.Density, to.Density, t);
             blended.Diffusion = Mathf.Lerp(from.Diffusion, to.Diffusion, t);
+            blended.WindLevel = Mathf.Lerp(from.WindLevel, to.WindLevel, t);
+            blended.PrecipitationLevel = Mathf.Lerp(from.PrecipitationLevel, to.PrecipitationLevel, t);
+            blended.TemperatureCelsius = Mathf.Lerp(from.TemperatureCelsius, to.TemperatureCelsius, t);
+            blended.Humidity = Mathf.Lerp(from.Humidity, to.Humidity, t);
             return blended;
         }
 

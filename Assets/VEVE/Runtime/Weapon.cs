@@ -108,7 +108,7 @@ namespace VEVE
                 if (target != null && remainingEnergy >= 0f && absorbed)
                 {
                     float energyRatio = Mathf.Clamp01(remainingEnergy / muzzleEnergy);
-                    target.ApplyDamage(damage * energyRatio, hit.collider.name.ToLowerInvariant().Contains("head") ? HitZone.Head : HitZone.Torso);
+                    target.ApplyDamage(damage * energyRatio, hit.collider.name.ToLowerInvariant().Contains("head") ? HitZone.Head : HitZone.UpperTorso);
                     break;
                 }
                 if (!absorbed) break;
