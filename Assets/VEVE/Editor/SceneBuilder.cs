@@ -102,6 +102,7 @@ namespace VEVE.Editor
             weaponObject.transform.localScale = new Vector3(0.15f, 0.15f, 0.6f);
             weaponObject.GetComponent<Renderer>().sharedMaterial = metal;
             Weapon weapon = weaponObject.AddComponent<Weapon>();
+            weaponObject.AddComponent<VEVE.UI.ScopeTelemetryBridge>();
             weaponObject.AddComponent<Maintenance>();
             WeaponDefinition weaponDefinition = AssetDatabase.LoadAssetAtPath<WeaponDefinition>("Assets/VEVE/CarbineDefinition.asset");
             if (weaponDefinition == null)

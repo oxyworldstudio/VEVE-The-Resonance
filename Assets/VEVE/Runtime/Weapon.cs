@@ -276,5 +276,11 @@ namespace VEVE
         public int RoundsRemaining => rounds;
         public bool IsMalfunctioned => malfunctioned;
         public float Recoil => recoil;
+        /// <summary>Baked battle-zero card (null when no catalogued weapon resolved).</summary>
+        public RangeCard ActiveRangeCard => card;
+        /// <summary>Turret elevation offset already dialled into the scope, in MOA.</summary>
+        public double TurretHoldoverMoa => turretMoa;
+        public float ZeroRangeMeters => definition != null ? definition.zeroRange : 0f;
+        public float SightHeightMeters => definition != null ? definition.sightHeight : 0f;
     }
 }

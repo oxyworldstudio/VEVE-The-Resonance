@@ -137,6 +137,14 @@ namespace VEVE.Editor
                     keyPaths = new[] { rt + "GameLoop.cs", rt + "EventBus.cs", rt + "SaveSystem.cs", "Assets/VEVE/Editor/SceneBuilder.cs" } },
                 new FeatureEntry { domain = "Infra", name = "Progress dashboard + runtime debug overlay", status = FeatureStatus.Implemented,
                     keyPaths = new[] { "Assets/VEVE/Editor/ProgressDashboard.cs", rt + "Diagnostics/DebugDashboardOverlay.cs" } },
+                new FeatureEntry { domain = "Tactility", name = "Doors/breach + partial reload (B5)", status = FeatureStatus.Implemented,
+                    keyPaths = new[] { rt + "World/DoorModel.cs", rt + "World/DoorSystem.cs", rt + "Combat/AmmunitionModel.cs", ts + "WorldInteractionModelsTests.cs" } },
+                new FeatureEntry { domain = "UI", name = "HUD diegesis per death mode (B6)", status = FeatureStatus.Implemented,
+                    keyPaths = new[] { rt + "UI/HudDiegesisProfile.cs", ts + "HudDiegesisProfileTests.cs" } },
+                new FeatureEntry { domain = "Campaign", name = "Mission scoring + rewards (B7)", status = FeatureStatus.Implemented,
+                    keyPaths = new[] { rt + "Scoring/MissionScoring.cs", ts + "MissionScoringTests.cs" } },
+                new FeatureEntry { domain = "Campaign", name = "Content catalog + difficulty tracks + scope telemetry (B8)", status = FeatureStatus.Implemented,
+                    keyPaths = new[] { rt + "Content/MissionContent.cs", rt + "UI/ScopeTelemetryBridge.cs", ts + "MissionContentTests.cs" } },
                 new FeatureEntry { domain = "Planned", name = "Multiplayer netcode / VR", status = FeatureStatus.Planned }
             };
         }
