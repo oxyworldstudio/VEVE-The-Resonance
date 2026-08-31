@@ -39,6 +39,25 @@ namespace VEVE
         private VEVE.Operators.OperatorInstance @operator;
         private RangeCard card;
         private double turretMoa;
+        [SerializeField, HideInInspector] private int reserveRounds;
+        private float reloadUntilTime = -1f;
+
+        /// <summary>Rounds currently waiting in the fielded reserve.</summary>
+        public int ReserveRounds => reserveRounds;
+        /// <summary>True while a reload timer is blocking the action.</summary>
+        public bool IsReloading => Time.time < reloadUntilTime;
+        /// <summary>0..1 progress of the in-flight reload (1 when idle).</summary>
+        public float ReloadProgress01
+        {
+            get
+            {
+                if (!IsReloading) return 1f;
+                float total = reloadUntilTime - reloadStartTime;
+                return total > 0f ? Mathf.Clamp01((Time.time - reloadStartTime) / total) : 1f;
+            }
+        }
+
+        private float reloadStartTime;
 
         private void Awake()
         {
@@ -51,6 +70,7 @@ namespace VEVE
                 twistRate = definition.twistRate;
             }
             rounds = magazineSize;
+            reserveRounds = VEVE.Combat.AmmunitionModel.StartReserve(magazineSize);
             maintenance = GetComponent<Maintenance>();
             @operator = GetComponentInParent<VEVE.Operators.OperatorInstance>();
             if (@operator != null && identity == null) identity = @operator.Identity;
@@ -94,8 +114,58 @@ namespace VEVE
         {
             float recoveryScale = @operator != null ? @operator.SwayRecoveryMultiplier : 1f;
             recoil = Mathf.MoveTowards(recoil, 0f, recoilRecovery * Mathf.Max(0.25f, recoveryScale) * Time.deltaTime);
-            if (Input.GetKeyDown(KeyCode.R)) { rounds = magazineSize; malfunctioned = false; }
-            if (!malfunctioned && Input.GetButton("Fire1") && Time.time >= nextShot) Fire();
+            bool wasReloading = IsReloading;
+            if (wasReloading && Time.time >= reloadUntilTime)
+            {
+                // Finish the reload: transfer was already applied at request time.
+            }
+            if (Input.GetKeyDown(KeyCode.R) && !wasReloading) BeginFullReload();
+            if (Input.GetKeyDown(KeyCode.T) && !wasReloading) BeginTacticalReload();
+            if (!malfunctioned && !wasReloading && Input.GetButton("Fire1") && Time.time >= nextShot) Fire();
+        }
+
+        /// <summary>
+        /// Dry/full reload: keeps current magazine in the gun conceptually (spent), tops up to
+        /// capacity from the reserve, clears a malfunction (stopping a stoppage) at extra time cost.
+        /// </summary>
+        private void BeginFullReload()
+        {
+            float baseReload = definition != null ? definition.reloadTime : 2.6f;
+            float speedMult = @operator != null ? @operator.ReloadSpeedMultiplier : 1f;
+            float seconds = roundsInMagazineAtReloadStart() == 0
+                ? VEVE.Combat.AmmunitionModel.DryReloadSeconds(baseReload, speedMult)
+                : VEVE.Combat.AmmunitionModel.FullReloadSeconds(baseReload, speedMult);
+            if (malfunctioned)
+            {
+                seconds += 1.2f;
+                malfunctioned = false;
+            }
+            int transferred = VEVE.Combat.AmmunitionModel.TransferForReload(rounds, magazineSize, reserveRounds, out int newReserve);
+            if (transferred <= 0) return;
+            reserveRounds = newReserve;
+            rounds += transferred;
+            reloadStartTime = Time.time;
+            reloadUntilTime = Time.time + seconds;
+            TacticalSound.Emit(transform.position, 12f);
+        }
+
+        /// <summary>Tactical swap: spent partial magazine discarded, full one from reserve.</summary>
+        private void BeginTacticalReload()
+        {
+            if (rounds >= magazineSize || reserveRounds <= 0) return;
+            VEVE.Combat.AmmunitionModel.TacticalTransfer(rounds, magazineSize, reserveRounds, out int roundsAfter, out int newReserve);
+            float baseReload = definition != null ? definition.reloadTime : 2.6f;
+            float speedMult = @operator != null ? @operator.ReloadSpeedMultiplier : 1f;
+            reloadStartTime = Time.time;
+            reloadUntilTime = Time.time + VEVE.Combat.AmmunitionModel.TacticalReloadSeconds(baseReload, speedMult);
+            reserveRounds = newReserve;
+            rounds = roundsAfter;
+            TacticalSound.Emit(transform.position, 12f);
+        }
+
+        private int roundsInMagazineAtReloadStart()
+        {
+            return rounds;
         }
 
         private void Fire()

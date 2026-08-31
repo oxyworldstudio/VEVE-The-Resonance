@@ -119,6 +119,13 @@ namespace VEVE.Editor
             enemy.GetComponent<Renderer>().sharedMaterial = concrete;
             Damageable damageable = enemy.AddComponent<Damageable>();
             enemy.AddComponent<VEVE.Gear.DamageableGearAdapter>();
+
+            GameObject doorObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            doorObject.name = "BarricadedDoor";
+            doorObject.transform.position = new Vector3(6f, 1.5f, 8f);
+            doorObject.transform.localScale = new Vector3(1.1f, 2.6f, 0.15f);
+            doorObject.GetComponent<Renderer>().sharedMaterial = wood;
+            doorObject.AddComponent<VEVE.World.DoorSystem>();
             EnemyAwareness awareness = enemy.AddComponent<EnemyAwareness>();
             SerializedObject aiData = new SerializedObject(awareness); 
             aiData.FindProperty("target").objectReferenceValue = player.transform; 
