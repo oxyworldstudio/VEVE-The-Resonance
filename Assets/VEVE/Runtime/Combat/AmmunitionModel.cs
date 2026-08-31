@@ -51,20 +51,23 @@ namespace VEVE.Combat
             return transferred;
         }
 
-        /// <summary>Tactical swap keeps the spent partial magazine conceptually (no rounds back).</summary>
+        /// <summary>
+        /// Tactical swap discards the partial magazine as-is: reserve is counted in ROUNDS,
+        /// so a swap spends a full magazine worth of rounds and returns a full tube.
+        /// </summary>
         public static void TacticalTransfer(int roundsInMagazine, int magazineSize, int reserveRounds,
             out int roundsAfter, out int newReserve)
         {
             int localRounds = roundsInMagazine > 0 ? roundsInMagazine : 0;
             int localReserve = reserveRounds > 0 ? reserveRounds : 0;
-            if (localRounds >= magazineSize || localReserve <= 0 || magazineSize <= 0)
+            if (localRounds >= magazineSize || localReserve < magazineSize || magazineSize <= 0)
             {
                 roundsAfter = localRounds;
                 newReserve = localReserve;
                 return;
             }
             roundsAfter = magazineSize;
-            newReserve = localReserve - 1;
+            newReserve = localReserve - magazineSize;
         }
     }
 }

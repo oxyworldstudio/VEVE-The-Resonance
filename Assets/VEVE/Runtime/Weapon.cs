@@ -203,10 +203,10 @@ namespace VEVE
             TacticalSound.Emit(transform.position, 12f);
         }
 
-        /// <summary>Tactical swap: spent partial magazine discarded, full one from reserve.</summary>
+        /// <summary>Tactical swap: spent partial magazine discarded, full one from reserve (whole tube paid).</summary>
         private void BeginTacticalReload()
         {
-            if (rounds >= magazineSize || reserveRounds <= 0) return;
+            if (rounds >= magazineSize || reserveRounds < magazineSize) return;
             VEVE.Combat.AmmunitionModel.TacticalTransfer(rounds, magazineSize, reserveRounds, out int roundsAfter, out int newReserve);
             float baseReload = definition != null ? definition.reloadTime : 2.6f;
             float speedMult = @operator != null ? @operator.ReloadSpeedMultiplier : 1f;

@@ -12,7 +12,7 @@
 | Tactics (B4) | SquadMorale FSM (KIA-chain, pinning latch, abandoned wounded), EngagementReporter, CampaignEscalationModel (posture), TacticalEventHub | 29 pure tests |
 | Comms (C5) | RadioNet doctrine (morale->tone->radio protocol), RadioDispatcher (clock-injectable, debrief regroup auto) | 6 tests |
 | Campaign loop (C2) | MissionSession (deterministic draft->tally->score->XP->escalate), CampaignLoopController + ShotResolvedEvent bus contract, MissionScoring B7 (failure policy + difficulty XP), OperatorLegacySystem B3 (KIA->memorial->mentorship successor), CampaignDifficulty tracks, MissionContentCatalog (10 ops / 5 biomes) + MissionScheduler | MissionSession/Content/Legacy suites |
-| Gear | VEVE.Gear NIJ/VPAM (multi-hit, obliquity, trauma budgets, force-open), WeaponCustomPro (scope specs, identity FNV, finishes NIR), Customization manager | 58/58 gear checks + gates |
+| Gear | VEVE.Gear NIJ/VPAM (multi-hit, obliquity, trauma budgets, force-open), WeaponCustomPro (scope specs, identity FNV, finishes NIR), Customization manager | committed Gear suite + agent offline run + gates |
 | World | TacticalLayoutEvaluator (LOS), PropScatter, RoomFunctionGraph, Biomes, procedural generation, DoorSystem+DoorModel, Destructible, Weather/Climate/Skybox/FogVolume | layout tests |
 | UX | UiFactory + HudDiegesis per death mode (Realistic = compass+vitals), AdvancedHUDLayout (9 features), InventoryUI, MainMenuFlow + Personalization 5-tab workspace + Binder, DiegeticReadout | 48 UI tests |
 | Observability | In-game DebugDashboard (F12) + Editor "VEVE > Progress Dashboard" (registry validated against disk, test results, git log) | live in HEAD |
@@ -22,10 +22,7 @@
 
 ## Remaining plan (ordered)
 
-1. **C4 - Netcode PvE (next)**
-   - `MissionSession` is already pure/deterministic -> make it the authoritative host object
-   - Serialize `BehaviorStep`/`ShotResolvedEvent`/`RadioBarkEvent` (all already plain structs) to the Player transport
-   - Lag-comp for hitscan on residual-energy math (deterministic -> replayable), per-client ownership of PlayerController only, server owns AI agents
+1. **C4 - Netcode PvE**: PROTOCOL LAYER LANDED (VEVE.Net, 100% pure/tested): NetCommand fixed-layout + MissionCommandJournal (single source of truth replacing the C2 double-tally), NetMissionMirror with bounded reorder buffer proving host/client structural parity, LoopbackLink frame-deterministic transport. REMAINING: install com.unity.netcodes.gameobject and write the thin NetworkBehaviour adapter over the same NetCommand struct + server-authoritative CampaignLoop hand-off.
 2. **C6 - AI perception realism pass**
    - Tie detection to the C5 radio (a contacted squad shares lastKnownEnemy via CommunicationSystem -> AgentBridge Callout), sound-occlusion-correct hearing through AudioOcclusion, scope-glint rule W3
 3. **C7 - Content pipeline to Unity assets**
@@ -37,3 +34,4 @@
 - Orchestrator owns any file a sub-agent was assigned if that agent stalls (takeover rule; verified clean 2x).
 - Every feature ships with its pure-model unit tests (the last "test failure" caught by a human/agent in C5 was the test, not the code - gate stays honest).
 - Commit == pushed == built == WebGL + dashboard validated against real files.
+

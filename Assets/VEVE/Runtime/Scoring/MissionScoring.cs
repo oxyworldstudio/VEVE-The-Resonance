@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace VEVE.Scoring
 {
-    /// <summary>Raw mission tallies fed to the calculator (design doc §9).</summary>
+    /// <summary>Raw mission tallies fed to the calculator (design doc Â§9).</summary>
     public struct MissionScoreInputs
     {
         public int shotsFired;
@@ -21,7 +21,7 @@ namespace VEVE.Scoring
 
     public enum MissionRank { Failed, Grunt, Operator, Ghost }
 
-    /// <summary>Additive score components (design doc §9 scoring formula).</summary>
+    /// <summary>Additive score components (design doc Â§9 scoring formula).</summary>
     public struct MissionScoreBreakdown
     {
         public int baseScore;
@@ -53,7 +53,7 @@ namespace VEVE.Scoring
         public const int MaxTimeBonus = 200;
         public const int StealthBonus = 250;
         public const int IntelPointsPerObject = 40;
-        public const int CrrBonusPerCrewKept = 60;
+        public const int CrewBonusPerCrewKept = 60;
         public const int CollateralPenaltyPerEvent = 250;
         public const int FrictionPenaltyPerMalfunction = 25;
 
@@ -80,8 +80,8 @@ namespace VEVE.Scoring
             }
 
             b.intelBonus = Mathf.Max(0, i.intelObjectsRecovered) * IntelPointsPerObject;
-            b.crewBonus = Mathf.Max(0, i.squadMembersTotal - i.squadMembersLost) * CrrBonusPerCrewKept
-                        + (i.squadMembersTotal > 0 ? CrrBonusPerCrewKept : 0);
+            b.crewBonus = Mathf.Max(0, i.squadMembersTotal - i.squadMembersLost) * CrewBonusPerCrewKept
+                        + (i.squadMembersTotal > 0 ? CrewBonusPerCrewKept : 0);
             b.collateralPenalty = Mathf.Max(0, i.civilianHarmEvents) * CollateralPenaltyPerEvent;
             b.frictionPenalty = Mathf.Max(0, i.malfunctionCount) * FrictionPenaltyPerMalfunction;
 
