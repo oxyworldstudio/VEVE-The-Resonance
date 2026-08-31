@@ -78,6 +78,7 @@ namespace VEVE.Editor
             player.AddComponent<VEVE.Operators.OperatorInstance>();
             player.AddComponent<Unity.Netcode.NetworkObject>();
             player.AddComponent<VEVE.Net.NetworkedPlayerAvatar>();
+            player.AddComponent<Unity.Netcode.Components.NetworkTransform>();
             
             SerializedObject coordinatorData = new SerializedObject(coordinator);
             coordinatorData.FindProperty("environment").objectReferenceValue = environmentSimulation;
@@ -136,6 +137,11 @@ namespace VEVE.Editor
             SerializedObject aiData = new SerializedObject(awareness); 
             aiData.FindProperty("target").objectReferenceValue = player.transform; 
             aiData.ApplyModifiedPropertiesWithoutUndo();
+            // C4e remote AI visibility: brain stays host/offline-only, NetworkTransform (authored pre-spawn)
+            // carries the movement stream to remote clients.
+            enemy.AddComponent<Unity.Netcode.NetworkObject>();
+            enemy.AddComponent<Unity.Netcode.Components.NetworkTransform>();
+            enemy.AddComponent<VEVE.Net.NetworkedAgentReplica>();
             
             GameObject head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             head.name = "Enemy_Head";

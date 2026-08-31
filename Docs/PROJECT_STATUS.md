@@ -43,3 +43,5 @@
 *C4c landed: NetworkGameFlow (host/client/offline authority split, NotifyShot fact API, debrief mirror symmetry) -> 334/334 EditMode.*
 
 *C4d landed: NetworkedPlayerAvatar + NetworkTransform movement, PlayerController input authority (offline-safe rules) -> 338/338. AI scene elements remain host-authoritative; remote NPC replication = C4e.*
+
+*C4e landed: host-only AI brains replicated to remote clients via authored NetworkObjects+NetworkTransform (offline-safe rules) -> 342/342. Remaining: C7 pipeline + polish.*
