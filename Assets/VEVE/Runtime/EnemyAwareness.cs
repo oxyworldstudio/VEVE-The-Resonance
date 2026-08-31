@@ -1,4 +1,5 @@
 using UnityEngine;
+using VEVE.AI;
 
 namespace VEVE
 {
@@ -10,6 +11,10 @@ namespace VEVE
         [SerializeField] private float hearingScale = 0.8f;
         [SerializeField, Range(0f, 1f)] private float hearingAbsorption;
         [SerializeField, Min(0.02f)] private float perceptionInterval = 0.1f;
+        [Tooltip("0..1 combat proficiency: drives time-to-acquire via TuningRules (reflex floor 0.62s, novice 1.5s).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float aiSkill01 = 0.5f;
+        private float acquisitionAccumulator;
         [Tooltip("Do not know gunfire positions perfectly: localize them with a bearing/range error cone.")]
         [SerializeField] private bool estimateNoise = true;
         [Tooltip("An AI that visually ENGAGES broadcasts the contact so nearby elements can converge.")]
@@ -29,6 +34,7 @@ namespace VEVE
             TacticalSound.NoiseProduced += OnNoise;
             AllyContactReported += OnAllyCallout;
         }
+
         private void OnDisable()
         {
             TacticalSound.NoiseProduced -= OnNoise;
@@ -80,7 +86,7 @@ namespace VEVE
             if (env == null) env = UnityEngine.Object.FindFirstObjectByType<EnvironmentSimulation>();
             if (env == null) return 0f;
             float mag = 0f;
-            if (VEVE.WeaponCustomPro.ScopeCatalog.TryGet(targetWeapon.MountedScopeId, out VEVE.WeaponCustomPro.ScopeProfile scope))
+            if (VEVE.Content.ScopeCatalogSource.TryGetScoped(targetWeapon.MountedScopeId, out VEVE.WeaponCustomPro.ScopeProfile scope))
                 mag = scope.magnificationMax;
             return AiAcoustics.ScopeGlintBonus(mag, env.SunElevation);
         }
@@ -102,36 +108,53 @@ namespace VEVE
             }
         }
 
-    private void UpdatePerception(Vector3 delta)
-    {
-        if (delta.magnitude > viewDistance) return;
-        float angle = Vector3.Angle(transform.forward, delta.normalized);
-        float halfAngle = viewAngle * 0.5f;
-        if (angle > halfAngle) return;
-
-        if (Physics.Raycast(transform.position + Vector3.up * 1.6f, delta.normalized, out RaycastHit hit, viewDistance))
+        private void UpdatePerception(Vector3 delta)
         {
-            if (hit.transform == target)
+            if (delta.magnitude > viewDistance)
             {
-                float distanceFactor = 1f - Mathf.Clamp01(delta.magnitude / viewDistance);
-                float angleFactor = 1f - Mathf.Clamp01(angle / halfAngle);
-                float detectionScore = distanceFactor * 0.6f + angleFactor * 0.4f + GlintBonus();
-                if (detectionScore > 0.4f)
-                {
-                    bool freshlyEngaged = State != AwarenessState.Engaged;
-                    lastKnownPosition = target.position;
-                    State = AwarenessState.Engaged;
-                    if (freshlyEngaged) BroadcastCallout(target.position);
-                }
+                acquisitionAccumulator = 0f;
+                return;
             }
-            else
+            float angle = Vector3.Angle(transform.forward, delta.normalized);
+            float halfAngle = viewAngle * 0.5f;
+            if (angle > halfAngle)
             {
+                acquisitionAccumulator = 0f;
+                return;
+            }
+
+            if (Physics.Raycast(transform.position + Vector3.up * 1.6f, delta.normalized, out RaycastHit hit, viewDistance))
+            {
+                if (hit.transform == target)
+                {
+                    float distanceFactor = 1f - Mathf.Clamp01(delta.magnitude / viewDistance);
+                    float angleFactor = 1f - Mathf.Clamp01(angle / halfAngle);
+                    float detectionScore = distanceFactor * 0.6f + angleFactor * 0.4f + GlintBonus();
+                    if (detectionScore > 0.4f)
+                    {
+                        acquisitionAccumulator += perceptionInterval;
+                        if (State != AwarenessState.Engaged &&
+                            acquisitionAccumulator >= TuningRules.TimeToAcquireSeconds(aiSkill01))
+                        {
+                            lastKnownPosition = target.position;
+                            State = AwarenessState.Engaged;
+                            BroadcastCallout(target.position);
+                        }
+                    }
+                    else
+                    {
+                        acquisitionAccumulator = 0f;
+                    }
+                    return;
+                }
+
+                // Raycast blocked by an occluder: losing visual contact.
                 if (State == AwarenessState.Engaged && delta.magnitude > viewDistance * 0.7f)
                 {
                     State = AwarenessState.Investigate;
+                    acquisitionAccumulator = 0f;
                 }
             }
         }
-    }
     }
 }
