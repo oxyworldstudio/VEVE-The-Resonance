@@ -25,7 +25,27 @@ namespace VEVE
         private float nextPerception;
         private Weapon targetWeapon;
         private EnvironmentSimulation env;
+        private Transform liveTarget;
+        private float nextRetarget;
         public AwarenessState State { get; private set; } = AwarenessState.Patrol;
+
+        /// <summary>
+        /// Online sessions: engage the nearest live networked pawn (the scene
+        /// rig is inert once a pawn claims it); offline behaviour is the
+        /// serialized rig target byte-for-byte as before.
+        /// </summary>
+        public Transform LiveTarget()
+        {
+            if (Time.unscaledTime < nextRetarget && liveTarget != null) return liveTarget;
+            nextRetarget = Time.unscaledTime + 0.25f;
+            var pawns = new System.Collections.Generic.List<Transform>(8);
+            VEVE.Net.NetworkedPlayerPawn.CollectCombatTargets(pawns);
+            liveTarget = pawns.Count > 0
+                ? (Transform)MultiTargetRules.ChooseNearest(pawns, transform.position) ?? target
+                : target;
+            if (liveTarget != target) targetWeapon = null;
+            return liveTarget;
+        }
 
         private static event System.Action<Vector3, int> AllyContactReported;
 
@@ -78,10 +98,10 @@ namespace VEVE
             if (spreadCallouts) AllyContactReported?.Invoke(contactPosition, GetInstanceID());
         }
 
-        private float GlintBonus()
+        private float GlintBonus(Transform observed)
         {
-            if (target == null) return 0f;
-            if (targetWeapon == null) targetWeapon = target.GetComponent<Weapon>();
+            if (observed == null) return 0f;
+            if (targetWeapon == null) targetWeapon = observed.GetComponent<Weapon>();
             if (targetWeapon == null || string.IsNullOrEmpty(targetWeapon.MountedScopeId)) return 0f;
             if (env == null) env = UnityEngine.Object.FindFirstObjectByType<EnvironmentSimulation>();
             if (env == null) return 0f;
@@ -93,12 +113,13 @@ namespace VEVE
 
         private void Update()
         {
-            if (target == null) return;
-            Vector3 delta = target.position - transform.position;
+            Transform tgt = LiveTarget();
+            if (tgt == null) return;
+            Vector3 delta = tgt.position - transform.position;
             if (Time.unscaledTime >= nextPerception)
             {
                 nextPerception = Time.unscaledTime + perceptionInterval;
-                UpdatePerception(delta);
+                UpdatePerception(delta, tgt);
             }
             if (lastKnownPosition != Vector3.zero)
             {
@@ -108,7 +129,7 @@ namespace VEVE
             }
         }
 
-        private void UpdatePerception(Vector3 delta)
+        private void UpdatePerception(Vector3 delta, Transform tgt)
         {
             if (delta.magnitude > viewDistance)
             {
@@ -125,20 +146,20 @@ namespace VEVE
 
             if (Physics.Raycast(transform.position + Vector3.up * 1.6f, delta.normalized, out RaycastHit hit, viewDistance))
             {
-                if (hit.transform == target)
+                if (hit.transform == tgt)
                 {
                     float distanceFactor = 1f - Mathf.Clamp01(delta.magnitude / viewDistance);
                     float angleFactor = 1f - Mathf.Clamp01(angle / halfAngle);
-                    float detectionScore = distanceFactor * 0.6f + angleFactor * 0.4f + GlintBonus();
+                    float detectionScore = distanceFactor * 0.6f + angleFactor * 0.4f + GlintBonus(tgt);
                     if (detectionScore > 0.4f)
                     {
                         acquisitionAccumulator += perceptionInterval;
                         if (State != AwarenessState.Engaged &&
                             acquisitionAccumulator >= TuningRules.TimeToAcquireSeconds(aiSkill01))
                         {
-                            lastKnownPosition = target.position;
+                            lastKnownPosition = tgt.position;
                             State = AwarenessState.Engaged;
-                            BroadcastCallout(target.position);
+                            BroadcastCallout(tgt.position);
                         }
                     }
                     else

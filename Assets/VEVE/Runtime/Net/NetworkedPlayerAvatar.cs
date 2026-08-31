@@ -56,6 +56,8 @@ namespace VEVE.Net
         private NetworkTransform netTransform;
         private Camera ownedCamera;
         private AudioListener[] ownedListeners;
+        private Weapon[] ownedWeapons;
+        private VEVE.UI.ScopeTelemetryBridge[] ownedTelemetry;
 
         public bool LocalInputActive => controller != null && controller.LocalInputEnabled;
         public bool NetworkedSync { get; private set; }
@@ -125,6 +127,8 @@ namespace VEVE.Net
         {
             ownedCamera = GetComponentInChildren<Camera>();
             ownedListeners = GetComponentsInChildren<AudioListener>();
+            ownedWeapons = GetComponentsInChildren<Weapon>(true);
+            ownedTelemetry = GetComponentsInChildren<VEVE.UI.ScopeTelemetryBridge>(true);
         }
 
         private void ApplyLocalPresentation(bool local)
@@ -136,6 +140,16 @@ namespace VEVE.Net
             {
                 for (int i = 0; i < ownedListeners.Length; i++)
                     ownedListeners[i].enabled = local;
+            }
+            if (ownedWeapons != null)
+            {
+                for (int i = 0; i < ownedWeapons.Length; i++)
+                    if (ownedWeapons[i] != null) ownedWeapons[i].enabled = local;
+            }
+            if (ownedTelemetry != null)
+            {
+                for (int i = 0; i < ownedTelemetry.Length; i++)
+                    if (ownedTelemetry[i] != null) ownedTelemetry[i].enabled = local;
             }
         }
     }

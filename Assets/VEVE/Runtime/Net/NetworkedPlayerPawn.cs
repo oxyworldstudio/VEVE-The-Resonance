@@ -46,5 +46,17 @@ namespace VEVE.Net
             for (int i = 0; i < Active.Count; i++) if (Active[i].OwnerClientId == clientId) n++;
             return n;
         }
+
+        /// <summary>Snapshot of live pawn transforms for AI target selection (destroyed entries skipped).</summary>
+        public static void CollectCombatTargets(System.Collections.Generic.List<Transform> into)
+        {
+            if (into == null) return;
+            for (int i = 0; i < Active.Count; i++)
+            {
+                NetworkedPlayerPawn p = Active[i];
+                if (p == null || p.transform == null) continue;
+                into.Add(p.transform);
+            }
+        }
     }
 }

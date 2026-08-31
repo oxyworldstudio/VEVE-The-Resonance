@@ -46,8 +46,24 @@ namespace VEVE.Editor
             var cam = camGo.AddComponent<Camera>();
             cam.clearFlags = CameraClearFlags.Skybox;
             camGo.AddComponent<AudioListener>();
+
+            // A (C4f-v2): the pawn's own weapon lives on the owner camera, same
+            // wiring as the scene rig - disabled alongside it until local control.
+            GameObject pawnGun = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            pawnGun.name = "PawnCarbine";
+            pawnGun.transform.SetParent(camGo.transform, false);
+            pawnGun.transform.localPosition = new Vector3(0.3f, -0.25f, 0.7f);
+            pawnGun.transform.localScale = new Vector3(0.15f, 0.15f, 0.6f);
+            pawnGun.GetComponent<Renderer>().sharedMaterial = new Material(Shader.Find("Standard")) { color = new Color(0.1f, 0.11f, 0.12f) };
+            var gunWeapon = pawnGun.AddComponent<Weapon>();
+            pawnGun.AddComponent<VEVE.UI.ScopeTelemetryBridge>();
+            pawnGun.AddComponent<Maintenance>();
+            var gunData = new SerializedObject(gunWeapon);
+            gunData.FindProperty("aimCamera").objectReferenceValue = cam;
+            gunData.FindProperty("definition").objectReferenceValue = AssetDatabase.LoadAssetAtPath<WeaponDefinition>("Assets/VEVE/CarbineDefinition.asset");
+            gunData.ApplyModifiedPropertiesWithoutUndo();
+
             camGo.SetActive(false);
-            cam = null;
 
             GameObject go = root;
             GameObject saved = PrefabUtility.SaveAsPrefabAsset(go, PrefabPath);
