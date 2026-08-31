@@ -43,6 +43,35 @@ namespace VEVE
         private float mountedClickMoa;
         private string lastQueriedOpticId;
         private float opticPollTimer;
+        private float nextGrenade;
+        [Tooltip("Casualty radius for grenades thrown from this weapon (metres).")]
+        [SerializeField] private float grenadeRadiusM = 8f;
+        [Tooltip("Total blast energy for grenades thrown from this weapon (J).")]
+        [SerializeField] private float grenadeEnergyJ = 230f;
+
+        /// <summary>Cooldown between throws (seconds).</summary>
+        public const float GrenadeThrowCooldownSeconds = 1.2f;
+
+        /// <summary>
+        /// Throw a frag: casualty bubble + fuse, owner-tagged; the projectile resolves armor
+        /// interaction and friendly immunity. False on cooldown or no aim camera wired.
+        /// </summary>
+        public bool TryThrowGrenade()
+        {
+            if (Time.unscaledTime < nextGrenade) return false;
+            if (aimCamera == null) return false;
+            nextGrenade = Time.unscaledTime + GrenadeThrowCooldownSeconds;
+
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            go.name = "Grenade";
+            go.transform.localScale = Vector3.one * 0.14f;
+            go.transform.position = aimCamera.transform.position + aimCamera.transform.forward * 0.55f;
+            var proj = go.AddComponent<VEVE.Combat.GrenadeProjectile>();
+            Vector3 dir = (aimCamera.transform.forward + Vector3.up * 0.22f).normalized;
+            proj.Configure(dir * VEVE.Combat.GrenadeRules.ThrowImpulseMps, grenadeRadiusM, grenadeEnergyJ,
+                OwnerClientId, VEVE.Combat.GrenadeRules.DefaultFuseSeconds);
+            return true;
+        }
         private RangeCard card;
         private double turretMoa;
         [SerializeField, HideInInspector] private int reserveRounds;
@@ -169,6 +198,7 @@ namespace VEVE
             }
             if (Input.GetKeyDown(KeyCode.R) && !wasReloading) BeginFullReload();
             if (Input.GetKeyDown(KeyCode.T) && !wasReloading) BeginTacticalReload();
+            if (Input.GetKeyDown(KeyCode.G) && Time.unscaledTime >= nextGrenade) TryThrowGrenade();
             opticPollTimer -= Time.unscaledDeltaTime;
             if (opticPollTimer <= 0f)
             {
