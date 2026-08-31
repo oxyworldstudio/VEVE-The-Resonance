@@ -38,21 +38,30 @@ namespace VEVE.Procedural
         public static int HeightUnit(int x, int y, int seed, string biomeKey)
         {
             int rough = Math.Max(1, RoughnessFor(biomeKey));
-            // first octave: broad ridge; second octave: rocky noise (both integer, no pow/sin)
-            int a = Fold(x + seed * 11, LatticeScale) * rough / rough;
-            int b = Fold((x + y * 2 + seed) * 7, LatticeScale) * (rough + 2) / 2;
-            int h = a + b - WaveAmplitude000 / 2;
-            return ClampSigned(h);
+            // two integer octaves, each centered around zero via FoldSigned (no pow/sin,
+            // no truncation of amplitude for low-roughness biomes)
+            int a = FoldSigned(x + seed * 11, LatticeScale) * rough / 10;
+            int b = FoldSigned((x + y * 2 + seed) * 7, LatticeScale) * (rough + 2) / 10;
+            return ClampSigned(a + b);
         }
 
         /// <summary>Height in metres [-amp, +amp], stable across runs and platforms.</summary>
+        /// <summary>Newest bound of HeightUnit so the metre conversion is normalized exactly.</summary>
+        public const int HeightUnitMax = 1126;
+
         public static float HeightMeters(int x, int y, int seed, string biomeKey)
         {
             float amp = AmplitudeMetres(biomeKey);
-            int max = WaveAmplitude000 / 2 + 200;
-            float n = HeightUnit(x, y, seed, biomeKey) / (float)max;
+            float n = HeightUnit(x, y, seed, biomeKey) / (float)HeightUnitMax;
             return n < -1f ? -amp : (n > 1f ? amp : n * amp);
         }
+
+        /// <summary>Symmetric lattice hash (FNV-fold, integer): maps v to [-scale, +scale).</summary>
+        static int FoldSigned(int v, int scale)
+        {
+            return Fold(v, scale) - scale;
+        }
+
 
         /// <summary>Local normalized slope penalty: monotonic and capped (flat -> 1).</summary>
         public static float SlopeFactor(float dyPerMetre)

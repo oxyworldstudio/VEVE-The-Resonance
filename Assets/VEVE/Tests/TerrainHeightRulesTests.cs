@@ -32,6 +32,18 @@ public sealed class TerrainHeightRulesTests
     }
 
     [Test]
+    public void RoughnessActuallyScalesHeightsRegression()
+    {
+        float flatMax = 0f, roughMax = 0f;
+        for (int s = 0; s < 160; s++)
+        {
+            flatMax = System.Math.Max(flatMax, System.Math.Abs(TerrainHeightRules.HeightMeters(s, s * 5 + 3, 77, "MEDIUM_TOWN")));
+            roughMax = System.Math.Max(roughMax, System.Math.Abs(TerrainHeightRules.HeightMeters(s, s * 5 + 3, 77, "SUBARCTIC_COMPOUND")));
+        }
+        Assert.Greater(roughMax, flatMax, "biome roughness MUST translate realized height (W14 review bug)");
+    }
+
+    [Test]
     public void SlopeCurveMonotonicAndFloored()
     {
         Assert.AreEqual(1f, TerrainHeightRules.SlopeFactor(0f), 1e-6f);

@@ -63,3 +63,5 @@
 *W13 grenades: blast via armor chain, friendly-immune, throw cooldown - 400/400.*
 
 *W14: deterministic fixed-point terrain shaping per biome, cross-platform stable - 403/403.*
+
+*CODE REVIEW SYSTEM live: agent pipeline (SelfCancel/Lifecycle/FloatAssert) + Orchestrator gate-mode + Editor menu; 411/411, self-scan 0 blockers.*
