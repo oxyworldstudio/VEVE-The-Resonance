@@ -190,6 +190,8 @@ namespace VEVE
                 hits[i] = ApplyZeroingHoldover(hits[i]);
             }
             float remainingEnergy = muzzleEnergy;
+            bool onTarget = false;
+            bool civilianHarm = false;
             foreach (RaycastHit hit in hits)
             {
                 if (hit.collider.transform.IsChildOf(transform) || hit.collider.transform == transform) continue;
@@ -245,10 +247,20 @@ namespace VEVE
                         }
                     }
                     target.ApplyDamage(appliedDamage, zone);
+                    onTarget = true;
+                    if (hit.collider.GetComponentInParent<VEVE.Agentic.CivilianAgent>() != null)
+                    {
+                        civilianHarm = true;
+                    }
                     break;
                 }
                 if (!absorbed) break;
             }
+            VEVE.EventBus.PublishGlobal(new VEVE.Content.ShotResolvedEvent
+            {
+                onTarget = onTarget,
+                civilianHarm = civilianHarm
+            });
         }
 
         /// <summary>
