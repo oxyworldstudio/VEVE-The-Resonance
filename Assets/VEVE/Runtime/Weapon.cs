@@ -306,6 +306,11 @@ namespace VEVE
                     {
                         civilianHarm = true;
                     }
+                    else if (VEVE.Catalog.FamilyXpLedger.Default != null)
+                    {
+                        VEVE.Catalog.FamilyXpLedger.Default.Grant(OwnerClientId, FamilyKey,
+                            FamilyXpLedger.XpPerHitOnTarget);
+                    }
                     break;
                 }
                 if (!absorbed) break;
@@ -348,6 +353,21 @@ namespace VEVE
         public double TurretHoldoverMoa => turretMoa;
         public float ZeroRangeMeters => definition != null ? definition.zeroRange : 0f;
         public float SightHeightMeters => definition != null ? definition.sightHeight : 0f;
+        /// <summary>Session owner for proficiency attribution; 0 when offline/unowned so single-player never bypasses the existing progression pipeline.</summary>
+        public ulong OwnerClientId { get; set; }
+        /// <summary>
+        /// Family attribution key: definition name normalized, else catalog id / generic. Stable
+        /// with the proficiency system family string contract (lowercase platform/weapon name).
+        /// </summary>
+        public string FamilyKey
+        {
+            get
+            {
+                if (definition != null && !string.IsNullOrEmpty(definition.weaponName))
+                    return definition.weaponName.ToLowerInvariant();
+                return string.IsNullOrEmpty(catalogWeaponId) ? "generic" : catalogWeaponId.ToLowerInvariant();
+            }
+        }
         /// <summary>Catalog id resolved for this weapon (C3 optic mounting key).</summary>
         public string CatalogWeaponId => catalogWeaponId;
         /// <summary>ScopeCatalog id of the mounted optic (null for iron sights / red dots not in scope catalog).</summary>

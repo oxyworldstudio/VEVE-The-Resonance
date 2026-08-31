@@ -82,6 +82,7 @@ namespace VEVE.Net
 
             NetworkedSync = !controller.LocalInputEnabled;
             ControlsLocalPlayer = controller.LocalInputEnabled;
+            StampWeaponOwnership();
             ApplyLocalPresentation(ControlsLocalPlayer);
         }
 
@@ -89,6 +90,7 @@ namespace VEVE.Net
         {
             if (controller != null) controller.LocalInputEnabled = true; // degrade safe after shutdown
             ApplyLocalPresentation(true);
+            ClearWeaponOwnership();
             NetworkedSync = false;
             ControlsLocalPlayer = true;
             base.OnNetworkDespawn();
@@ -151,6 +153,20 @@ namespace VEVE.Net
                 for (int i = 0; i < ownedTelemetry.Length; i++)
                     if (ownedTelemetry[i] != null) ownedTelemetry[i].enabled = local;
             }
+        }
+
+        private void StampWeaponOwnership()
+        {
+            if (ownedWeapons == null || NetworkObject == null) return;
+            for (int i = 0; i < ownedWeapons.Length; i++)
+                if (ownedWeapons[i] != null) ownedWeapons[i].OwnerClientId = NetworkObject.OwnerClientId;
+        }
+
+        private void ClearWeaponOwnership()
+        {
+            if (ownedWeapons == null) return;
+            for (int i = 0; i < ownedWeapons.Length; i++)
+                if (ownedWeapons[i] != null) ownedWeapons[i].OwnerClientId = 0;
         }
     }
 }
