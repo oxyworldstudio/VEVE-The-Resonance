@@ -103,7 +103,8 @@ namespace VEVE.Content
 
             string region = Normalize(string.IsNullOrEmpty(regionKey) ? defaultRegionKey : regionKey);
             int cycle = completedInRegion.TryGetValue(region, out int c) ? c : 0;
-            MissionTemplate template = MissionScheduler.Draft(region, cycle);
+            // C7: designer Resources pool preferred, code catalog is the guaranteed fallback
+            MissionTemplate template = MissionScheduler.Draft(region, cycle, MissionCatalogSource.Resolve());
 
             session = new MissionSession(template, difficulty);
             int alert = PostureToIntensity(region);

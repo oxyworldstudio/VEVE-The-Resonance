@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Mission_SUBARCTIC_FENCELINE
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 0
+  id: SUBARCTIC_FENCELINE
+  payload: 'id=SUBARCTIC_FENCELINE
+
+    title=Perimeter Fenceline
+
+    region=SUBARCTIC_COMPOUND
+
+    par=960
+
+    pairs=4
+
+    alert=0.6
+
+    intelw=0.7
+
+    objs=Primary:
+    cut the fence for the armor approach%7CSecondary: kill the dogs (collateral risk)%7CHidden:
+    zero friendly losses
+
+'

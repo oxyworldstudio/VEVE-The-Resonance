@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Mission_INDUSTRIAL_BOILER
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 0
+  id: INDUSTRIAL_BOILER
+  payload: 'id=INDUSTRIAL_BOILER
+
+    title=Boiler Room Breach
+
+    region=INDUSTRIAL_EAST
+
+    par=720
+
+    pairs=3
+
+    alert=0.4
+
+    intelw=1.2
+
+    objs=Primary:
+    destroy the ledger server%7CSecondary: breach the catwalk (door)%7CHidden: keep
+    the night shift quiet
+
+'

@@ -193,14 +193,26 @@ namespace VEVE.Content
     {
         public static MissionTemplate Draft(string regionKey, int completedInRegion)
         {
+            return Draft(regionKey, completedInRegion, null);
+        }
+
+        /// <summary>Designer pool variant (C7 asset pipeline): source defaults to the code catalog.</summary>
+        public static MissionTemplate Draft(string regionKey, int completedInRegion, System.Collections.Generic.IReadOnlyList<MissionTemplate> source)
+        {
             List<MissionTemplate> pool = new List<MissionTemplate>();
-            foreach (MissionTemplate t in MissionContentCatalog.All)
+            System.Collections.Generic.IReadOnlyList<MissionTemplate> catalog =
+                source != null && source.Count > 0 ? source : (System.Collections.Generic.IReadOnlyList<MissionTemplate>)MissionContentCatalog.All;
+            for (int i = 0; i < catalog.Count; i++)
             {
+                MissionTemplate t = catalog[i];
                 if (string.Equals(t.regionKey, regionKey, StringComparison.OrdinalIgnoreCase))
                     pool.Add(t);
             }
 
-            if (pool.Count == 0) pool.AddRange(MissionContentCatalog.All);
+            if (pool.Count == 0)
+            {
+                for (int i = 0; i < catalog.Count; i++) pool.Add(catalog[i]);
+            }
 
             int cycle = completedInRegion >= 0 ? completedInRegion : 0;
             uint hash = Hash(regionKey + "#" + cycle);
