@@ -212,7 +212,9 @@ namespace VEVE.CodeReview
             return new ReviewOrchestrator()
                 .Add(new SelfCancellationRule())
                 .Add(new SubscribePairRule())
-                .Add(new FloatAssertionRule());
+                .Add(new FloatAssertionRule())
+                .Add(new VEVE.CodeReview.Agents.SimDataRule())
+                .Add(new VEVE.CodeReview.Agents.DeterminismRule());
         }
 
         public IReadOnlyList<ReviewIssue> Run(string file, string[] lines)

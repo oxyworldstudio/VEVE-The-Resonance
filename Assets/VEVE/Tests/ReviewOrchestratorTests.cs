@@ -107,7 +107,7 @@ public sealed class ReviewOrchestratorTests
     public void AgentsRunOnEmptyAndNullSafety()
     {
         var o = ReviewOrchestrator.CreateDefault().Add(new SelfCancellationRule()); // idempotent: same rule ignored
-        Assert.AreEqual(3, o.AgentCount);
+        Assert.AreEqual(5, o.AgentCount, "5 specialists default");
         Assert.AreEqual(0, o.Run("empty", System.Array.Empty<string>()).Count);
     }
 }
