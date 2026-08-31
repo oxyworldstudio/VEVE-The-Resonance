@@ -42,6 +42,23 @@ namespace VEVE.Net
         public NetSessionMode Mode { get; private set; } = NetSessionMode.Offline;
         public NetworkManager Manager { get; private set; }
         public MissionTransportAdapter Adapter { get; private set; }
+
+        /// <summary>Set by the lobby panel so drop/reconnect rules engage (NGO disconnect hook).</summary>
+        public System.Action ConnectionLost;
+        private bool disconnectHooked;
+
+        private void HookDisconnect()
+        {
+            var nm = NetworkManager.Singleton;
+            if (nm == null) return;
+            if (!disconnectHooked)
+            {
+                nm.OnClientDisconnectCallback += _ => { if (modeIsLive()) ConnectionLost?.Invoke(); };
+                disconnectHooked = true;
+            }
+        }
+
+        private bool modeIsLive() => Mode == NetSessionMode.Client || (Manager != null && Manager.IsListening && !Manager.IsHost);
         public MissionCommandJournal Journal => Adapter != null ? Adapter.Journal : _journal;
         public NetMissionMirror Mirror => Adapter != null ? Adapter.Mirror : _mirror;
 
@@ -72,9 +89,10 @@ namespace VEVE.Net
         {
             if (!NetFlowRules.CanStartNewSession(Mode)) return false;
             EnsureInfra(serverAddress, port);
-            if (!Manager.StartClient()) return false;
+            if (!Manager.StartClient()) { Mode = NetSessionMode.Offline; return false; }
             Mode = NetSessionMode.Client;
             ApplyAuthority();
+            HookDisconnect();
             return true;
         }
 
