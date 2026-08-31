@@ -76,6 +76,8 @@ namespace VEVE.Editor
             player.AddComponent<VEVE.RealisticPhysics.TerminalVelocityFallingSystem>();
             player.AddComponent<VEVE.Gear.DamageableGearAdapter>();
             player.AddComponent<VEVE.Operators.OperatorInstance>();
+            player.AddComponent<Unity.Netcode.NetworkObject>();
+            player.AddComponent<VEVE.Net.NetworkedPlayerAvatar>();
             
             SerializedObject coordinatorData = new SerializedObject(coordinator);
             coordinatorData.FindProperty("environment").objectReferenceValue = environmentSimulation;

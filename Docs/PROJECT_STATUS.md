@@ -41,3 +41,5 @@
 *NGO transport installed: manifest 2.13.2, MissionTransportAdapter + explicit asmdef refs (autoReferenced does NOT cascade to asmdef assemblies) -> 329/329 EditMode green incl. all pre-existing suites.*
 
 *C4c landed: NetworkGameFlow (host/client/offline authority split, NotifyShot fact API, debrief mirror symmetry) -> 334/334 EditMode.*
+
+*C4d landed: NetworkedPlayerAvatar + NetworkTransform movement, PlayerController input authority (offline-safe rules) -> 338/338. AI scene elements remain host-authoritative; remote NPC replication = C4e.*

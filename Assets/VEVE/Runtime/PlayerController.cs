@@ -34,6 +34,10 @@ namespace VEVE
         [SerializeField] private float inertiaTensor = 10f;
 
         [SerializeField] private RealismConfig realismConfig;
+        [Tooltip("Disabled on non-local avatars while a network session is live (NetworkedPlayerAvatar drives it); true offline so single-player gameplay is structurally guaranteed.")]
+        [SerializeField] private bool localInputEnabled = true;
+
+        public bool LocalInputEnabled { get => localInputEnabled; set => localInputEnabled = value; }
 
         /// <summary>
         /// Standard gravitational acceleration magnitude (CODATA). The signed field value
@@ -116,6 +120,19 @@ namespace VEVE
 
         private void Update()
         {
+            if (!localInputEnabled)
+            {
+                // Remote avatar: the NetworkTransform owns the transform; local
+                // momentum is frozen so re-activating ownership starts clean.
+                if (velocity.x != 0f || velocity.z != 0f)
+                {
+                    velocity.x = 0f;
+                    velocity.z = 0f;
+                    currentSpeed = 0f;
+                }
+                return;
+            }
+
             float inputX = Input.GetAxisRaw("Horizontal");
             float inputZ = Input.GetAxisRaw("Vertical");
             Vector3 input = Vector3.ClampMagnitude(transform.right * inputX + transform.forward * inputZ, 1f);
