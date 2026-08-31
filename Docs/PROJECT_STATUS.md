@@ -61,3 +61,5 @@
 *W9-11: lobby roster model, pawn starter gear (fast_mt+iiia_soft via real TryEquip paths), render-tick interpolation base - 396/396.*
 
 *W13 grenades: blast via armor chain, friendly-immune, throw cooldown - 400/400.*
+
+*W14: deterministic fixed-point terrain shaping per biome, cross-platform stable - 403/403.*
