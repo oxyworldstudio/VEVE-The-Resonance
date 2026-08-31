@@ -147,6 +147,10 @@ namespace VEVE.Editor
                     keyPaths = new[] { rt + "Content/MissionContent.cs", rt + "UI/ScopeTelemetryBridge.cs", ts + "MissionContentTests.cs" } },
                 new FeatureEntry { domain = "UI", name = "Diegetic scope reticle (C1)", status = FeatureStatus.Implemented,
                     keyPaths = new[] { rt + "UI/ScopeReticleOverlay.cs", ts + "ScopeReticleOverlayTests.cs" } },
+                new FeatureEntry { domain = "Weapons", name = "Real optic mount C3: ScopeCatalog -> attachment bridge, live reticle scale", status = FeatureStatus.Implemented,
+                    keyPaths = new[] { rt + "WeaponCustomPro/OpticCatalogBridge.cs", ts + "OpticCatalogBridgeTests.cs" } },
+                new FeatureEntry { domain = "Campaign", name = "Campaign loop C2: draft -> tally -> scoring -> XP -> escalation", status = FeatureStatus.Implemented,
+                    keyPaths = new[] { rt + "Content/MissionSession.cs", rt + "Content/CampaignLoopController.cs", ts + "MissionSessionTests.cs", ts + "MissionContentTests.cs" } },
                 new FeatureEntry { domain = "Planned", name = "Multiplayer netcode / VR", status = FeatureStatus.Planned }
             };
         }

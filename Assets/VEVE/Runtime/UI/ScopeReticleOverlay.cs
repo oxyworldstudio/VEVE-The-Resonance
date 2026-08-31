@@ -68,6 +68,44 @@ namespace VEVE.UI
         private void Awake()
         {
             BuildReticle();
+            EnsureSubscribed(true);
+        }
+
+        // Editor lifecycle can delay OnEnable behind the first public call; re-arming
+        // the subscription here (idempotent) makes the overlay correct in headless edit
+        // tests and harmless in play mode, where Awake already subscribes.
+
+        private void OnEnable()
+        {
+            EnsureSubscribed(true);
+        }
+
+        private void OnDisable()
+        {
+            EnsureSubscribed(false);
+        }
+
+        private void OnDestroy()
+        {
+            EnsureSubscribed(false);
+        }
+
+        private bool subscribed;
+
+        private void EnsureSubscribed(bool on)
+        {
+            if (on == subscribed) return;
+            subscribed = on;
+            if (on)
+            {
+                VEVE.EventBus.SubscribeGlobal<ScopeTelemetryEvent>(OnTelemetry);
+                VEVE.EventBus.SubscribeGlobal<VEVE.WeaponCustomPro.OpticMountedEvent>(OnOpticMounted);
+            }
+            else
+            {
+                VEVE.EventBus.UnsubscribeGlobal<ScopeTelemetryEvent>(OnTelemetry);
+                VEVE.EventBus.UnsubscribeGlobal<VEVE.WeaponCustomPro.OpticMountedEvent>(OnOpticMounted);
+            }
         }
 
         private void BuildReticle()
@@ -105,14 +143,12 @@ namespace VEVE.UI
                 new Vector2(160f, 22f), new Vector2(90f, -20f));
         }
 
-        private void OnEnable()
+        /// <summary>Per-mounted-optic reticle scale: wider picture FOV = fewer px per MOA.</summary>
+        private void OnOpticMounted(VEVE.WeaponCustomPro.OpticMountedEvent e)
         {
-            VEVE.EventBus.SubscribeGlobal<ScopeTelemetryEvent>(OnTelemetry);
-        }
-
-        private void OnDisable()
-        {
-            VEVE.EventBus.UnsubscribeGlobal<ScopeTelemetryEvent>(OnTelemetry);
+            if (e == null) return;
+            float fov = e.fovDegAtMinZoom > 0f ? e.fovDegAtMinZoom : DefaultFieldOfViewDegrees;
+            SetReticleGeometry(DefaultCanvasWidthPx, fov);
         }
 
         private void OnTelemetry(ScopeTelemetryEvent e)
@@ -162,6 +198,7 @@ namespace VEVE.UI
         /// <summary>Override reticle geometry (bound later from ScopeProfile per mounted optic).</summary>
         public void SetReticleGeometry(float canvasWidthPx, float fieldOfViewDegrees)
         {
+            EnsureSubscribed(true);
             pixelsPerMoa = PixelsPerMoa(canvasWidthPx, fieldOfViewDegrees);
         }
 

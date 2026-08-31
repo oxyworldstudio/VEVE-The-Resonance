@@ -37,6 +37,12 @@ namespace VEVE
         private bool malfunctioned;
         private Maintenance maintenance;
         private VEVE.Operators.OperatorInstance @operator;
+        [SerializeField] private VEVE.Customization.WeaponCustomizationManager customization;
+        private string catalogWeaponId;
+        private string mountedScopeId;
+        private float mountedClickMoa;
+        private string lastQueriedOpticId;
+        private float opticPollTimer;
         private RangeCard card;
         private double turretMoa;
         [SerializeField, HideInInspector] private int reserveRounds;
@@ -78,22 +84,64 @@ namespace VEVE
         }
 
         /// <summary>
-        /// Bakes the battle-zero range card when a catalogued weapon id can be resolved — either
-        /// from the serialized identity, or from a definition whose weapon name matches a catalog
-        /// id or display name — and the definition carries zeroing geometry. Null leaves the fire
-        /// loop on the pure line-of-sight path.
+        /// Bakes the battle-zero range card. Sight height uses the MOUNTED optic's real
+        /// bore-to-centerline (C3) when the weapon has a ScopeCatalog optic equipped via the
+        /// customization manager; otherwise the definition's iron-sight height. Click value
+        /// for the dialled turret comes from the optic (0-click red dots fall back to the card).
         /// </summary>
         private void ResolveRangeCard()
         {
             card = null;
             turretMoa = 0.0;
+            mountedScopeId = null;
+            mountedClickMoa = 0f;
+            if (customization == null && WeaponCustomizationHost.Instance != null)
+                customization = WeaponCustomizationHost.Instance.Customization;
             string weaponId = identity != null && IconicWeaponCatalog.TryGet(identity.weaponId, out _)
                 ? identity.weaponId
                 : (definition != null ? ResolveCatalogIdByName(definition.weaponName) : null);
+            catalogWeaponId = weaponId;
             if (weaponId == null || definition == null || definition.zeroRange <= 0f) return;
-            if (!ZeroingSystem.TryComputeCard(weaponId, definition.zeroRange, definition.sightHeight * 1000f, out RangeCard computed)) return;
+
+            float sightMm = definition.sightHeight * 1000f;
+            ScopeProfile mounted = null;
+            if (customization != null && OpticCatalogBridge.TryGetMounted(customization, weaponId, out mounted))
+            {
+                mountedScopeId = mounted.id;
+                if (mounted.boreToOpticCenterlineMm > 0f) sightMm = mounted.boreToOpticCenterlineMm;
+                mountedClickMoa = mounted.elevationClickMoa;
+            }
+
+            if (!ZeroingSystem.TryComputeCard(weaponId, definition.zeroRange, sightMm, out RangeCard computed)) return;
             card = computed;
-            turretMoa = identity != null ? identity.zeroClicksElevation * card.ClickValueMoa : 0.0;
+            double clickValue = mountedClickMoa > 0f ? mountedClickMoa : card.ClickValueMoa;
+            turretMoa = identity != null ? identity.zeroClicksElevation * clickValue : 0.0;
+            if (customization != null) lastQueriedOpticId = OpticCatalogBridge.MountedOpticId(customization, weaponId);
+
+            VEVE.EventBus.PublishGlobal(new OpticMountedEvent
+            {
+                weaponId = weaponId,
+                scopeId = mountedScopeId,
+                fovDegAtMinZoom = mounted != null ? mounted.fovDegAtMinZoom : 0f,
+                elevationClickMoa = mountedClickMoa
+            });
+        }
+
+        /// <summary>Wires the zero card after Awake and whenever the optic mount changes.</summary>
+        [ContextMenu("Rebuild Range Card")]
+        public void RebuildRangeCard()
+        {
+            ResolveRangeCard();
+        }
+
+        private void PollOpticMount()
+        {
+            if (customization == null && WeaponCustomizationHost.Instance != null)
+                customization = WeaponCustomizationHost.Instance.Customization;
+            if (customization == null || string.IsNullOrEmpty(catalogWeaponId)) return;
+            string now = OpticCatalogBridge.MountedOpticId(customization, catalogWeaponId);
+            if (string.Equals(now, lastQueriedOpticId, System.StringComparison.Ordinal)) return;
+            RebuildRangeCard();
         }
 
         private static string ResolveCatalogIdByName(string weaponName)
@@ -121,6 +169,12 @@ namespace VEVE
             }
             if (Input.GetKeyDown(KeyCode.R) && !wasReloading) BeginFullReload();
             if (Input.GetKeyDown(KeyCode.T) && !wasReloading) BeginTacticalReload();
+            opticPollTimer -= Time.unscaledDeltaTime;
+            if (opticPollTimer <= 0f)
+            {
+                opticPollTimer = 0.5f;
+                PollOpticMount();
+            }
             if (!malfunctioned && !wasReloading && Input.GetButton("Fire1") && Time.time >= nextShot) Fire();
         }
 
@@ -294,5 +348,11 @@ namespace VEVE
         public double TurretHoldoverMoa => turretMoa;
         public float ZeroRangeMeters => definition != null ? definition.zeroRange : 0f;
         public float SightHeightMeters => definition != null ? definition.sightHeight : 0f;
+        /// <summary>Catalog id resolved for this weapon (C3 optic mounting key).</summary>
+        public string CatalogWeaponId => catalogWeaponId;
+        /// <summary>ScopeCatalog id of the mounted optic (null for iron sights / red dots not in scope catalog).</summary>
+        public string MountedScopeId => mountedScopeId;
+        /// <summary>Elevation click value in MOA of the mounted optic (0 when none).</summary>
+        public float MountedClickMoa => mountedClickMoa;
     }
 }

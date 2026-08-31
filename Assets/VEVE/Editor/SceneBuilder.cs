@@ -43,6 +43,7 @@ namespace VEVE.Editor
             simulation.AddComponent<SimulationDiagnostics>();
             simulation.AddComponent<VEVE.Scoring.MissionScoreBoard>();
             simulation.AddComponent<VEVE.Content.CampaignLoopController>();
+            simulation.AddComponent<VEVE.WeaponCustomPro.WeaponCustomizationHost>();
             
             GameObject sunObject = new GameObject("Sun");
             Light sun = sunObject.AddComponent<Light>();

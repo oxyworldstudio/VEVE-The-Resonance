@@ -207,6 +207,21 @@ namespace VEVE.Customization
             return totalWeight;
         }
 
+        /// <summary>
+        /// Registers an extra attachment definition (idempotent: an existing id is kept,
+        /// returns false). Used by the optic catalog bridge to expose real scopes.
+        /// </summary>
+        public bool RegisterAttachment(AttachmentDefinition definition)
+        {
+            if (string.IsNullOrEmpty(definition.attachmentId)) return false;
+            for (int i = 0; i < availableAttachments.Count; i++)
+            {
+                if (availableAttachments[i].attachmentId == definition.attachmentId) return false;
+            }
+            availableAttachments.Add(definition);
+            return true;
+        }
+
         public List<AttachmentDefinition> GetAvailableAttachments(int playerLevel)
         {
             return availableAttachments.Where(a => a.requiredLevel <= playerLevel).ToList();
