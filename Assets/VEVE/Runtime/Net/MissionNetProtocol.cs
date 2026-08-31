@@ -27,7 +27,7 @@ namespace VEVE.Net
     /// without another serialization layer. seq is the single global ordering authority:
     /// the journal assigns it, clients acknowledge it, late-join replays by it.
     /// </summary>
-    public struct NetCommand
+    public partial struct NetCommand
     {
         public ushort senderId;
         public int frame;

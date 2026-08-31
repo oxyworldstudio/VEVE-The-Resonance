@@ -27,6 +27,13 @@ namespace VEVE.Content
         private readonly Dictionary<string, int> completedInRegion = new Dictionary<string, int>();
         private readonly Dictionary<string, VEVE.Tactics.PostureDelta> nextPosture = new Dictionary<string, VEVE.Tactics.PostureDelta>();
 
+        /// <summary>
+        /// Connected by MissionTransportAdapter (C4b): every tally fact this loop
+        /// produces is ALSO emitted as an ordered journal command, so the client
+        /// mirror sees exactly what the authoritative session saw.
+        /// </summary>
+        public System.Action<VEVE.Net.NetCommand> CommandSink;
+
         public MissionPhase Phase => session != null ? session.Phase : MissionPhase.Briefing;
         public MissionTemplate CurrentTemplate => session != null ? session.Template : default;
         public MissionSession CurrentSession => session;
@@ -75,9 +82,14 @@ namespace VEVE.Content
             MissionTemplate template = MissionScheduler.Draft(region, cycle);
 
             session = new MissionSession(template, difficulty);
-            session.SetAlertAtInsert(PostureToIntensity(region));
+            int alert = PostureToIntensity(region);
+            session.SetAlertAtInsert(alert);
             session.Deploy();
             publish(MissionPhase.Deployed, template.id);
+
+            CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.MissionStart,
+                VEVE.Net.MissionNetMap.IndexOfTemplate(template.id), 0, (float)difficulty));
+            CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.AlertSet, alert));
 
             if (scoreboard != null)
             {
@@ -118,6 +130,8 @@ namespace VEVE.Content
                 breakdown = breakdown,
                 missionTemplateId = session.Template.id
             });
+            CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.MissionEnd,
+                success ? 1 : 0, 0, elapsedSeconds));
             return breakdown;
         }
 
@@ -127,7 +141,11 @@ namespace VEVE.Content
         {
             if (e == null) return;
             if (session != null && session.Phase == MissionPhase.Deployed)
+            {
                 session.RecordShot(e.onTarget, e.civilianHarm);
+                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.ShotFired,
+                    e.onTarget ? 1 : 0, e.civilianHarm ? 1 : 0));
+            }
             if (scoreboard != null)
             {
                 scoreboard.ReportShot(e.onTarget);
@@ -137,25 +155,41 @@ namespace VEVE.Content
 
         public void ReportIntelObject()
         {
-            if (session != null && session.Phase == MissionPhase.Deployed) session.ReportIntelObject();
+            if (session != null && session.Phase == MissionPhase.Deployed)
+            {
+                session.ReportIntelObject();
+                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.IntelObject));
+            }
             if (scoreboard != null) scoreboard.ReportIntelObject();
         }
 
         public void ReportContactHeld()
         {
-            if (session != null && session.Phase == MissionPhase.Deployed) session.ReportContactHeld();
+            if (session != null && session.Phase == MissionPhase.Deployed)
+            {
+                session.ReportContactHeld();
+                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.ContactHeld));
+            }
             if (scoreboard != null) scoreboard.ReportContactHeld();
         }
 
         public void ReportMalfunction()
         {
-            if (session != null && session.Phase == MissionPhase.Deployed) session.ReportMalfunction();
+            if (session != null && session.Phase == MissionPhase.Deployed)
+            {
+                session.ReportMalfunction();
+                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.Malfunction));
+            }
         }
 
         public void SetSquadSize(int members)
         {
             int m = Math.Max(1, members);
-            if (session != null) session.SetSquadTotal(m);
+            if (session != null)
+            {
+                session.SetSquadTotal(m);
+                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.SquadTotalSet, m));
+            }
             if (scoreboard != null) scoreboard.ReportSquadTotal(m);
         }
 

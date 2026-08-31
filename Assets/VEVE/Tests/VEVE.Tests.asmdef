@@ -3,6 +3,7 @@
   "rootNamespace": "",
   "references": [
     "VEVE.Runtime",
+    "Unity.Netcode.Runtime",
     "UnityEngine.TestRunner",
     "UnityEditor.TestRunner"
   ],
