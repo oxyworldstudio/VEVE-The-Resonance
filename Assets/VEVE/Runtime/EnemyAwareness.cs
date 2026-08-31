@@ -10,13 +10,30 @@ namespace VEVE
         [SerializeField] private float hearingScale = 0.8f;
         [SerializeField, Range(0f, 1f)] private float hearingAbsorption;
         [SerializeField, Min(0.02f)] private float perceptionInterval = 0.1f;
+        [Tooltip("Do not know gunfire positions perfectly: localize them with a bearing/range error cone.")]
+        [SerializeField] private bool estimateNoise = true;
+        [Tooltip("An AI that visually ENGAGES broadcasts the contact so nearby elements can converge.")]
+        [SerializeField] private bool spreadCallouts = true;
+        [SerializeField, Min(10f)] private float calloutRadius = 120f;
         private Vector3 lastKnownPosition;
         private float lastNoiseTime = -Mathf.Infinity;
         private float nextPerception;
+        private Weapon targetWeapon;
+        private EnvironmentSimulation env;
         public AwarenessState State { get; private set; } = AwarenessState.Patrol;
 
-        private void OnEnable() => TacticalSound.NoiseProduced += OnNoise;
-        private void OnDisable() => TacticalSound.NoiseProduced -= OnNoise;
+        private static event System.Action<Vector3, int> AllyContactReported;
+
+        private void OnEnable()
+        {
+            TacticalSound.NoiseProduced += OnNoise;
+            AllyContactReported += OnAllyCallout;
+        }
+        private void OnDisable()
+        {
+            TacticalSound.NoiseProduced -= OnNoise;
+            AllyContactReported -= OnAllyCallout;
+        }
 
         private void OnNoise(Vector3 position, float loudness)
         {
@@ -24,10 +41,48 @@ namespace VEVE
             float heardLoudness = SoundPropagation.HeardLoudness(loudness, distance, hearingAbsorption);
             if (heardLoudness * hearingScale >= 1f && Time.time > lastNoiseTime + 0.1f)
             {
-                lastKnownPosition = position;
+                lastKnownPosition = estimateNoise
+                    ? AiAcoustics.EstimateNoisePosition(transform.position, position, heardLoudness,
+                        (uint)(GetInstanceID() ^ (uint)Time.frameCount))
+                    : position;
                 lastNoiseTime = Time.time;
-                State = AwarenessState.Investigate;
+                if (State != AwarenessState.Engaged) State = AwarenessState.Investigate;
             }
+        }
+
+        /// <summary>
+        /// Radio callout relay: a contact reported by a friendly element converges this
+        /// shooter onto the (slightly degraded) reported position instead of the true one -
+        /// comms are never as good as eyes.
+        /// </summary>
+        private void OnAllyCallout(Vector3 reportedPosition, int reporterId)
+        {
+            if (!spreadCallouts || State == AwarenessState.Engaged) return;
+            if (reporterId == GetInstanceID()) return;
+            float dist = Vector3.Distance(transform.position, reportedPosition);
+            if (dist > calloutRadius) return;
+            uint seed = AiAcoustics.CalloutSeed(reporterId, reportedPosition);
+            lastKnownPosition = AiAcoustics.EstimateNoisePosition(transform.position, reportedPosition,
+                26f, seed);
+            State = AwarenessState.Investigate;
+        }
+
+        private void BroadcastCallout(Vector3 contactPosition)
+        {
+            if (spreadCallouts) AllyContactReported?.Invoke(contactPosition, GetInstanceID());
+        }
+
+        private float GlintBonus()
+        {
+            if (target == null) return 0f;
+            if (targetWeapon == null) targetWeapon = target.GetComponent<Weapon>();
+            if (targetWeapon == null || string.IsNullOrEmpty(targetWeapon.MountedScopeId)) return 0f;
+            if (env == null) env = UnityEngine.Object.FindFirstObjectByType<EnvironmentSimulation>();
+            if (env == null) return 0f;
+            float mag = 0f;
+            if (VEVE.WeaponCustomPro.ScopeCatalog.TryGet(targetWeapon.MountedScopeId, out VEVE.WeaponCustomPro.ScopeProfile scope))
+                mag = scope.magnificationMax;
+            return AiAcoustics.ScopeGlintBonus(mag, env.SunElevation);
         }
 
         private void Update()
@@ -60,11 +115,13 @@ namespace VEVE
             {
                 float distanceFactor = 1f - Mathf.Clamp01(delta.magnitude / viewDistance);
                 float angleFactor = 1f - Mathf.Clamp01(angle / halfAngle);
-                float detectionScore = distanceFactor * 0.6f + angleFactor * 0.4f;
+                float detectionScore = distanceFactor * 0.6f + angleFactor * 0.4f + GlintBonus();
                 if (detectionScore > 0.4f)
                 {
+                    bool freshlyEngaged = State != AwarenessState.Engaged;
                     lastKnownPosition = target.position;
                     State = AwarenessState.Engaged;
+                    if (freshlyEngaged) BroadcastCallout(target.position);
                 }
             }
             else
