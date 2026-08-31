@@ -17,6 +17,9 @@ namespace VEVE.Content
     {
         public bool onTarget;
         public bool civilianHarm;
+        /// <summary>Local prediction metadata for reconciliation; -1 when server-side (no prediction to check).</summary>
+        public int predictedTick = -1;
+        public ulong predictedOwner;
     }
 
     public enum MissionPhase { Briefing, Deployed, Debrief }

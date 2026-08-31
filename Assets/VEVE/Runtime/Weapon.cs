@@ -315,10 +315,32 @@ namespace VEVE
                 }
                 if (!absorbed) break;
             }
+            RecordPrediction(onTarget);
             VEVE.EventBus.PublishGlobal(new VEVE.Content.ShotResolvedEvent
             {
                 onTarget = onTarget,
-                civilianHarm = civilianHarm
+                civilianHarm = civilianHarm,
+                predictedTick = predictedTick,
+                predictedOwner = owner
+            });
+        }
+
+        /// <summary>Local shot predictions for lag-comp reconciliation (bounded ring).</summary>
+        public static readonly VEVE.Net.ShotReplayWindow Predictions = new VEVE.Net.ShotReplayWindow(192);
+        private int predictedTick;
+        private ulong owner;
+
+        private void RecordPrediction(bool hit)
+        {
+            owner = OwnerClientId != 0 ? OwnerClientId : VEVE.Net.LagCompRules.OfflineOwner;
+            predictedTick = Time.frameCount;
+            if (OwnerClientId == 0) return; // offline host: reconciliation is a session concern
+            Predictions.Mark(new VEVE.Net.ShotPrediction
+            {
+                tick = predictedTick,
+                owner = OwnerClientId,
+                localHit = hit,
+                distanceM = 0f
             });
         }
 

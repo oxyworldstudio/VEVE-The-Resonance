@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using VEVE.Scoring;
@@ -165,17 +165,26 @@ namespace VEVE.Content
         private void OnShot(ShotResolvedEvent e)
         {
             if (e == null) return;
-            ApplyShotFact(e.onTarget, e.civilianHarm);
+            ApplyShotFact(e);
         }
 
         /// <summary>Direct fact injection (host integrators / headless tests): one shot resolved.</summary>
         public void NotifyShot(bool onTarget, bool civilianHarm = false)
         {
-            ApplyShotFact(onTarget, civilianHarm);
+            ApplyShotFact(new ShotResolvedEvent
+            {
+                onTarget = onTarget,
+                civilianHarm = civilianHarm,
+                predictedTick = UnityEngine.Time.frameCount
+            });
         }
 
-        private void ApplyShotFact(bool onTarget, bool civilianHarm)
+        private void ApplyShotFact(ShotResolvedEvent e)
         {
+            // lag-comp telemetry v1: journal fact reconciled against the shooter's local ring
+            VEVE.Net.LagCompRules.Reconcile(Weapon.Predictions, e.predictedOwner, e.predictedTick, e.onTarget);
+            bool onTarget = e.onTarget;
+            bool civilianHarm = e.civilianHarm;
             if (Authoritative)
             {
                 if (session != null && session.Phase == MissionPhase.Deployed) session.RecordShot(onTarget, civilianHarm);
@@ -245,3 +254,4 @@ namespace VEVE.Content
         }
     }
 }
+
