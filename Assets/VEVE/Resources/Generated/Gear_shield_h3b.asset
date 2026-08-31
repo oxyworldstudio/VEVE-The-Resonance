@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Gear_shield_h3b
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 2
+  id: shield_h3b
+  payload: 'id=shield_h3b
+
+    name=HighCom H3B Level III+
+
+    slot=10
+
+    cat=8
+
+    prot=5
+
+    stop=0
+
+    mass=9.5
+
+    vol=80
+
+    mob=0.45
+
+    aim=0.3
+
+    heat=15
+
+    ir=1
+
+    comms=0
+
+    cov=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+'

@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_svd-dragunov
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: svd-dragunov
+  payload: 'id=svd-dragunov
+
+    name=SVD Dragunov
+
+    maker=Izhmash / Kalashnikov
+    Concern
+
+    caliber=7.62x54mmR
+
+    desc=Semi-automatic 7.62x54R marksman rifle.
+
+    role=8
+
+    proj=1
+
+    mv=830
+
+    mass=0.00984
+
+    bc=0.43
+
+    twist=240
+
+    barrel=620
+
+    smooth=0
+
+    mag=10
+
+    fire=0.2
+
+    energy=3389
+
+    pubenergy=3300
+
+    dmg=80
+
+    eff=800
+
+    max=3800
+
+    weapmass=4.3
+
+    recoil=1.5
+
+    rv=3.2
+
+    rh=1.8
+
+    rcp=Full-power,
+    steady
+
+'

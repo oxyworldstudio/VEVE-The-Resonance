@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_glock-17
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: glock-17
+  payload: 'id=glock-17
+
+    name=Glock 17
+
+    maker=Glock Ges.m.b.H.
+
+    caliber=9x19mm
+    Parabellum
+
+    desc=Striker-fired 9mm service pistol, 17-round magazine.
+
+    role=0
+
+    proj=0
+
+    mv=375
+
+    mass=0.008
+
+    bc=0.12
+
+    twist=254
+
+    barrel=114
+
+    smooth=0
+
+    mag=17
+
+    fire=0.15
+
+    energy=563
+
+    pubenergy=570
+
+    dmg=26
+
+    eff=50
+
+    max=1500
+
+    weapmass=0.71
+
+    recoil=0.55
+
+    rv=1.5
+
+    rh=1
+
+    rcp=Snappy,
+    light blaster
+
+'

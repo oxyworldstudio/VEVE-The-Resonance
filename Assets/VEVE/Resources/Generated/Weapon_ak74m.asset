@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_ak74m
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: ak74m
+  payload: 'id=ak74m
+
+    name=AK-74M
+
+    maker=Kalashnikov Concern
+
+    caliber=5.45x39mm
+
+    desc=Russian
+    5.45mm service rifle, high-velocity small-calibre.
+
+    role=5
+
+    proj=0
+
+    mv=880
+
+    mass=0.0034
+
+    bc=0.18
+
+    twist=200
+
+    barrel=415
+
+    smooth=0
+
+    mag=30
+
+    fire=0.0923
+
+    energy=1316
+
+    pubenergy=1327
+
+    dmg=34
+
+    eff=500
+
+    max=3600
+
+    weapmass=3.4
+
+    recoil=0.62
+
+    rv=1.7
+
+    rh=1.2
+
+    rcp=Light,
+    sharp crack; mild 5.45 impulse
+
+'

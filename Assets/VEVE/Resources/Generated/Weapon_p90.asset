@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_p90
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: p90
+  payload: 'id=p90
+
+    name=FN P90
+
+    maker=FN Herstal
+
+    caliber=5.7x28mm
+
+    desc=Bullpup
+    PDW feeding the 5.7x28mm round via a half-magazine.
+
+    role=3
+
+    proj=2
+
+    mv=715
+
+    mass=0.002
+
+    bc=0.15
+
+    twist=225
+
+    barrel=407
+
+    smooth=0
+
+    mag=50
+
+    fire=0.0667
+
+    energy=511
+
+    pubenergy=500
+
+    dmg=22
+
+    eff=150
+
+    max=1500
+
+    weapmass=2.6
+
+    recoil=0.34
+
+    rv=0.9
+
+    rh=0.6
+
+    rcp=Very
+    light, top-mounted 50-round magazine
+
+'

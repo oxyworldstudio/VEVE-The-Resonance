@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_remington-870
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: remington-870
+  payload: 'id=remington-870
+
+    name=Remington 870
+
+    maker=Remington
+
+    caliber=12
+    Gauge (2 3/4 in)
+
+    desc=Pump shotgun modelled with a nominal 1 oz slug projectile.
+
+    role=1
+
+    proj=0
+
+    mv=425
+
+    mass=0.02835
+
+    bc=0.11
+
+    twist=0
+
+    barrel=470
+
+    smooth=1
+
+    mag=5
+
+    fire=0.75
+
+    energy=2560
+
+    pubenergy=2600
+
+    dmg=90
+
+    eff=50
+
+    max=150
+
+    weapmass=3.3
+
+    recoil=3.5
+
+    rv=5.5
+
+    rh=2.5
+
+    rcp=Hard,
+    heavy pump recoil
+
+'

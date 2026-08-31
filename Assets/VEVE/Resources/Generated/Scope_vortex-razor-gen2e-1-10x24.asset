@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Scope_vortex-razor-gen2e-1-10x24
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 3
+  id: vortex-razor-gen2e-1-10x24
+  payload: 'id=vortex-razor-gen2e-1-10x24
+
+    name=Vortex Razor HD Gen II-E 1-10x24
+
+    maker=Vortex
+    Optics
+
+    reticle=EBR-7C MRAD illuminated (FFP)
+
+    magmin=1
+
+    magmax=10
+
+    obj=24
+
+    tube=30
+
+    eyerelief=95
+
+    fovmin=19
+
+    fovmax=3.4
+
+    focal=360
+
+    retunit=2
+
+    retsub=0.1
+
+    clickel=0.35
+
+    clickwd=0.35
+
+    travelel=140
+
+    fplane=2
+
+    illum=1
+
+    parmin=23
+
+    parres=0.5
+
+    grams=622
+
+    len=267
+
+    bore=40
+
+    rail=1
+
+'

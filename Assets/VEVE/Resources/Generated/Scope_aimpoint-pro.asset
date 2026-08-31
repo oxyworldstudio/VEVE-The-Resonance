@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Scope_aimpoint-pro
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 3
+  id: aimpoint-pro
+  payload: 'id=aimpoint-pro
+
+    name=Aimpoint PRO
+
+    maker=Aimpoint AB
+
+    reticle=2
+    / 4 / 6 MOA dot (red)
+
+    magmin=1
+
+    magmax=1
+
+    obj=26
+
+    tube=30
+
+    eyerelief=0
+
+    fovmin=19
+
+    fovmax=19
+
+    focal=360
+
+    retunit=1
+
+    retsub=2
+
+    clickel=1
+
+    clickwd=1
+
+    travelel=150
+
+    fplane=0
+
+    illum=1
+
+    parmin=0
+
+    parres=1
+
+    grams=150
+
+    len=119
+
+    bore=38.4
+
+    rail=1
+
+'

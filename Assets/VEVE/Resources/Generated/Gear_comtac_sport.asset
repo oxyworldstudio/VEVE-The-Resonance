@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Gear_comtac_sport
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 2
+  id: comtac_sport
+  payload: 'id=comtac_sport
+
+    name=Peltor SportTac
+
+    slot=2
+
+    cat=2
+
+    prot=0
+
+    stop=0
+
+    mass=0.3
+
+    vol=3
+
+    mob=0.98
+
+    aim=0.99
+
+    heat=5
+
+    ir=0.5
+
+    comms=0
+
+    cov=0.03,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+'

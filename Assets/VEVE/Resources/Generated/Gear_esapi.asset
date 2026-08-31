@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Gear_esapi
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 2
+  id: esapi
+  payload: 'id=esapi
+
+    name=ESAPI Level III+/.4 M16 Plate Set
+
+    slot=3
+
+    cat=3
+
+    prot=9
+
+    stop=0
+
+    mass=11.2
+
+    vol=6
+
+    mob=0.84
+
+    aim=0.88
+
+    heat=18
+
+    ir=0.7
+
+    comms=0
+
+    cov=0,0,0.62,0.55,0,0,0,0,0,0,0,0,0,0,0,0
+
+'

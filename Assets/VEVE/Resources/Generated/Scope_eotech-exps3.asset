@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Scope_eotech-exps3
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 3
+  id: eotech-exps3
+  payload: 'id=eotech-exps3
+
+    name=EOTech EXPS3
+
+    maker=L3 / EOTech
+
+    reticle=68
+    MOA ring + 1 MOA dot (holographic)
+
+    magmin=1
+
+    magmax=1
+
+    obj=70
+
+    tube=0
+
+    eyerelief=0
+
+    fovmin=34
+
+    fovmax=34
+
+    focal=360
+
+    retunit=1
+
+    retsub=1
+
+    clickel=0.5
+
+    clickwd=0.5
+
+    travelel=40
+
+    fplane=0
+
+    illum=1
+
+    parmin=0
+
+    parres=1
+
+    grams=315
+
+    len=94
+
+    bore=57
+
+    rail=1
+
+'

@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_m249
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: m249
+  payload: 'id=m249
+
+    name=M249 SAW
+
+    maker=FN Herstal
+
+    caliber=5.56x45mm
+    NATO
+
+    desc=Squad automatic weapon, belt/drum fed, long heavy barrel.
+
+    role=9
+
+    proj=0
+
+    mv=950
+
+    mass=0.004
+
+    bc=0.3
+
+    twist=178
+
+    barrel=465
+
+    smooth=0
+
+    mag=200
+
+    fire=0.075
+
+    energy=1805
+
+    pubenergy=1850
+
+    dmg=35
+
+    eff=800
+
+    max=4000
+
+    weapmass=7.5
+
+    recoil=0.72
+
+    rv=1.8
+
+    rh=1.3
+
+    rcp=Sustained,
+    controllable for a belt-fed
+
+'

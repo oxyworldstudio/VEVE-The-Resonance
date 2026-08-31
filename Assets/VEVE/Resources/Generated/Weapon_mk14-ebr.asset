@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_mk14-ebr
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: mk14-ebr
+  payload: 'id=mk14-ebr
+
+    name=Mk 14 EBR
+
+    maker=Springfield / USFFN
+
+    caliber=7.62x51mm
+    NATO
+
+    desc=Enhanced Battle Rifle in an adjustable Sage chassis.
+
+    role=7
+
+    proj=1
+
+    mv=830
+
+    mass=0.01134
+
+    bc=0.49
+
+    twist=279
+
+    barrel=559
+
+    smooth=0
+
+    mag=20
+
+    fire=0.2
+
+    energy=3906
+
+    pubenergy=3900
+
+    dmg=62
+
+    eff=800
+
+    max=4600
+
+    weapmass=4.4
+
+    recoil=1.7
+
+    rv=3.3
+
+    rh=2
+
+    rcp=Sharp,
+    free-float chassis
+
+'

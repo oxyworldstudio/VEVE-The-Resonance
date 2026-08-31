@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Scope_trijicon-ta31
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 3
+  id: trijicon-ta31
+  payload: 'id=trijicon-ta31
+
+    name=Trijicon ACOG TA31 4x32 (RCO)
+
+    maker=Trijicon
+
+    reticle=BAC
+    crosshair, MOA hold ladder
+
+    magmin=4
+
+    magmax=4
+
+    obj=32
+
+    tube=0
+
+    eyerelief=38
+
+    fovmin=7.3
+
+    fovmax=7.3
+
+    focal=282
+
+    retunit=1
+
+    retsub=1
+
+    clickel=0.5
+
+    clickwd=0.5
+
+    travelel=60
+
+    fplane=1
+
+    illum=1
+
+    parmin=0
+
+    parres=1.5
+
+    grams=380
+
+    len=142
+
+    bore=38
+
+    rail=1
+
+'

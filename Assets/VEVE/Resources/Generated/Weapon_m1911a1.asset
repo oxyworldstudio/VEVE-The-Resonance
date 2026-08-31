@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_m1911a1
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: m1911a1
+  payload: 'id=m1911a1
+
+    name=M1911A1
+
+    maker=Colt / Military Contract
+
+    caliber=11.43x23mm
+    (.45 ACP)
+
+    desc=.45 ACP service pistol, 230gr ball, 7-round single-stack.
+
+    role=0
+
+    proj=1
+
+    mv=255
+
+    mass=0.0149
+
+    bc=0.16
+
+    twist=406
+
+    barrel=127
+
+    smooth=0
+
+    mag=7
+
+    fire=0.15
+
+    energy=484
+
+    pubenergy=480
+
+    dmg=42
+
+    eff=50
+
+    max=1300
+
+    weapmass=1.1
+
+    recoil=0.7
+
+    rv=2
+
+    rh=1.3
+
+    rcp=Heavy
+    push, slower muzzle rise
+
+'

@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_scar-h
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: scar-h
+  payload: 'id=scar-h
+
+    name=FN SCAR-H (Mk 17)
+
+    maker=FN Herstal
+
+    caliber=7.62x51mm
+    NATO
+
+    desc=Heavy SCAR (175gr M118LR load) chambered in 7.62 NATO.
+
+    role=6
+
+    proj=1
+
+    mv=790
+
+    mass=0.01134
+
+    bc=0.49
+
+    twist=254
+
+    barrel=330
+
+    smooth=0
+
+    mag=20
+
+    fire=0.1
+
+    energy=3539
+
+    pubenergy=3550
+
+    dmg=58
+
+    eff=800
+
+    max=4600
+
+    weapmass=3.7
+
+    recoil=1.65
+
+    rv=3.2
+
+    rh=1.9
+
+    rcp=Heavy,
+    snappy full-power
+
+'

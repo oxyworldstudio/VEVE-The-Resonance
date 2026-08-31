@@ -53,7 +53,8 @@ namespace VEVE.WeaponCustomPro
             scope = null;
             if (manager == null || string.IsNullOrEmpty(weaponId)) return false;
             string optic = EquippedOpticId(manager, weaponId);
-            return !string.IsNullOrEmpty(optic) && ScopeCatalog.TryGet(optic, out scope);
+            // C7: designer scope assets override published values transparently
+            return !string.IsNullOrEmpty(optic) && VEVE.Content.ScopeCatalogSource.TryGetScoped(optic, out scope);
         }
 
         /// <summary>Current equipped-optic id for the weapon (null when slot empty / manager missing).</summary>

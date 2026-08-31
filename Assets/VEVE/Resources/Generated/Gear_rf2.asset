@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Gear_rf2
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 2
+  id: rf2
+  payload: 'id=rf2
+
+    name=AR500 RF2 Level III Plate Set
+
+    slot=3
+
+    cat=3
+
+    prot=5
+
+    stop=0
+
+    mass=6.6
+
+    vol=5
+
+    mob=0.88
+
+    aim=0.9
+
+    heat=14
+
+    ir=0.65
+
+    comms=0
+
+    cov=0,0,0.55,0.5,0,0,0,0,0,0,0,0,0,0,0,0
+
+'

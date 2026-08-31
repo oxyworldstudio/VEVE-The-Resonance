@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_ak103
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: ak103
+  payload: 'id=ak103
+
+    name=AK-103
+
+    maker=Kalashnikov Concern
+
+    caliber=7.62x39mm
+
+    desc=Kalashnikov-pattern
+    carbine firing the intermediate M43 cartridge.
+
+    role=5
+
+    proj=0
+
+    mv=715
+
+    mass=0.00797
+
+    bc=0.27
+
+    twist=240
+
+    barrel=415
+
+    smooth=0
+
+    mag=30
+
+    fire=0.1
+
+    energy=2037
+
+    pubenergy=2100
+
+    dmg=44
+
+    eff=400
+
+    max=3500
+
+    weapmass=3.3
+
+    recoil=0.98
+
+    rv=2.3
+
+    rh=1.5
+
+    rcp=Moderate,
+    rolling 7.62x39 kick
+
+'

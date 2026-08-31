@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_mp5a5
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: mp5a5
+  payload: 'id=mp5a5
+
+    name=MP5A5
+
+    maker=Heckler & Koch
+
+    caliber=9x19mm
+    Parabellum
+
+    desc=Roller-delayed 9mm SMG firing 124gr loadings.
+
+    role=2
+
+    proj=0
+
+    mv=360
+
+    mass=0.008
+
+    bc=0.12
+
+    twist=250
+
+    barrel=150
+
+    smooth=0
+
+    mag=30
+
+    fire=0.075
+
+    energy=518
+
+    pubenergy=500
+
+    dmg=24
+
+    eff=100
+
+    max=1200
+
+    weapmass=2.54
+
+    recoil=0.48
+
+    rv=1
+
+    rh=0.7
+
+    rcp=Low,
+    soft roller-delayed recoil
+
+'

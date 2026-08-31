@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Weapon_scar-l
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 1
+  id: scar-l
+  payload: 'id=scar-l
+
+    name=FN SCAR-L (Mk 16)
+
+    maker=FN Herstal
+
+    caliber=5.56x45mm
+    NATO
+
+    desc=Light variant of the SCAR family in 5.56 NATO.
+
+    role=5
+
+    proj=0
+
+    mv=860
+
+    mass=0.004
+
+    bc=0.3
+
+    twist=178
+
+    barrel=356
+
+    smooth=0
+
+    mag=30
+
+    fire=0.1
+
+    energy=1479
+
+    pubenergy=1480
+
+    dmg=34
+
+    eff=500
+
+    max=4000
+
+    weapmass=3.56
+
+    recoil=0.68
+
+    rv=1.6
+
+    rh=1
+
+    rcp=Smooth,
+    low impulse
+
+'
