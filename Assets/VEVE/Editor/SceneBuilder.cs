@@ -203,6 +203,13 @@ namespace VEVE.Editor
             interfaceObject.AddComponent<VEVE.UI.MissionDebriefView>();
             interfaceObject.AddComponent<VEVE.Comms.RadioDispatcher>();
             interfaceObject.AddComponent<VEVE.UI.DebriefPanel>();
+
+            // W9: joinable lobby roster on SceneLobbyPanel (starts hidden, shown pre-session)
+            GameObject sessionRoot = new GameObject("SessionLobby");
+            sessionRoot.AddComponent<Unity.Netcode.NetworkObject>();
+            sessionRoot.AddComponent<VEVE.Net.NetworkGameFlow>();
+            sessionRoot.AddComponent<VEVE.Net.SessionLobbyPanel>();
+            sessionRoot.AddComponent<VEVE.UI.LobbyRosterPanel>();
             interfaceObject.AddComponent<VEVE.Net.NetworkGameFlow>();
 
             GameObject dashboardObject = new GameObject("DebugDashboard");

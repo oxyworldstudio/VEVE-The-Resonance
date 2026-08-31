@@ -57,3 +57,5 @@
 *W7: unified debrief (rank+XP by owner+reconciler telemetry+biome alert floors) 389/389; round closed, deploy live.*
 
 *W8 content expansion: 15 authored operations (3/biome) exported to designer assets; content tests 15-count exact - 389/389.*
+
+*W9-11: lobby roster model, pawn starter gear (fast_mt+iiia_soft via real TryEquip paths), render-tick interpolation base - 396/396.*

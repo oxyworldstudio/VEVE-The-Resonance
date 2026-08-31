@@ -33,6 +33,17 @@ namespace VEVE.Gear
         /// <param name="angleDeg">Angle from armor surface normal, degrees.</param>
         /// <param name="result">Mitigation payload.</param>
         /// <returns>False when there is no gear to consult.</returns>
+        /// <summary>
+        /// Populate a starter kit if this rig is bare (W10). Idempotent: an equipped
+        /// loadout is left untouched. Returns false only for a genuine cap/validation failure.
+        /// </summary>
+        public bool EnsureStarterGear()
+        {
+            if (loadout != null) return true;
+            loadout = new GearLoadout();
+            return StarterLoadoutRules.TryBuild(loadout, out _);
+        }
+
         public static bool TryMitigate(GearLoadout loadout, float incomingEnergyJoules, float velocityMps, HitZone zone, float angleDeg, ref GearMitigationResult result)
         {
             if (loadout == null || incomingEnergyJoules <= 0f) return false;

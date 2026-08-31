@@ -58,6 +58,8 @@ namespace VEVE.Editor
             var gunWeapon = pawnGun.AddComponent<Weapon>();
             pawnGun.AddComponent<VEVE.UI.ScopeTelemetryBridge>();
             pawnGun.AddComponent<Maintenance>();
+            var pawnGear = root.AddComponent<VEVE.Gear.DamageableGearAdapter>();
+            pawnGear.EnsureStarterGear();
             var gunData = new SerializedObject(gunWeapon);
             gunData.FindProperty("aimCamera").objectReferenceValue = cam;
             gunData.FindProperty("definition").objectReferenceValue = AssetDatabase.LoadAssetAtPath<WeaponDefinition>("Assets/VEVE/CarbineDefinition.asset");
