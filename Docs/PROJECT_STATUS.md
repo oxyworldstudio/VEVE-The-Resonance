@@ -49,3 +49,5 @@
 *Step D pipeline-prep: PipelineCompat (family-aware shader resolver, 3 tests) + migration playbook; URP 17.x NOT manifest-forced (public registry caps at 10.10.1) -> WebGL + 359/359 stay green; HDRP route documented as PC/console branch.*
 
 *Phase 2 (C4f-v2) landed: pawn-carried weapons (own optic fire line) + nearest-pawn AI acquisition (MultiTargetRules pure). Double-pass native: 362/362.*
+
+*Windows 1-4 completed: session UX, per-pawn XP, deterministic lag-comp telemetry, procedural art pass - 379/379 green.*

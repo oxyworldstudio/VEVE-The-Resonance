@@ -217,6 +217,16 @@ namespace VEVE.Editor
 
         private static Material MakeMaterial(string name, Color color, float metallic = 0.3f, float smoothness = 0.5f)
         {
+            if (VEVE.Graphics.SurfaceArtRules.TryPalette(name, out var palette))
+            {
+                color = palette.baseColor;
+                smoothness = palette.gloss;
+            }
+            else if (VEVE.Graphics.SurfaceArtRules.TryPalette(VEVE.Graphics.SurfaceArtRules.ResolveKey(name), out var alt))
+            {
+                color = alt.baseColor;
+                smoothness = alt.gloss;
+            }
             Material existing = AssetDatabase.LoadAssetAtPath<Material>("Assets/VEVE/" + name + ".mat");
             if (existing != null) return existing;
             Shader shader = VEVE.Graphics.PipelineCompat.ResolveLitShader();
