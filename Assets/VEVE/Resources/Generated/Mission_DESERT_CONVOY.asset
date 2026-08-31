@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Mission_DESERT_CONVOY
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 0
+  id: DESERT_CONVOY
+  payload: 'id=DESERT_CONVOY
+
+    title=Fuel Convoy
+
+    region=DESERT_CHECKPOINT
+
+    par=900
+
+    pairs=4
+
+    alert=0.45
+
+    intelw=1.3
+
+    objs=Primary:
+    disable the lead technical%7CSecondary: capture the fuel manifest%7CHidden: no
+    convoy survivors reaching the well
+
+'

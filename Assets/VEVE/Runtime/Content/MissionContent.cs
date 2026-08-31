@@ -92,6 +92,37 @@ namespace VEVE.Content
                 id = "VILLAGE_BELLTOWER", title = "Belltower Spotters", regionKey = "FOREST_VILLAGE",
                 parSeconds = 720, enemySquadPairs = 3, alertBias = 0.45f, intelObjectiveWeight = 1.0,
                 objectiveSummary = new[] { "Primary: neutralize both spotters", "Secondary: wire the church for charges", "Hidden: village stays off the network" }
+            },
+            // ---- W8: third operation authored per biome ----
+            new MissionTemplate
+            {
+                id = "MEDITERRA_ROOFTOPS", title = "Rooftop Crossing", regionKey = "MEDIUM_TOWN",
+                parSeconds = 660, enemySquadPairs = 3, alertBias = 0.3f, intelObjectiveWeight = 1.15,
+                objectiveSummary = new[] { "Primary: clear the three-sided roof contact", "Secondary: recover the courier satchel", "Hidden: no rooftop entry witnessed" }
+            },
+            new MissionTemplate
+            {
+                id = "INDUSTRIAL_PIPE", title = "Pipeline Trench", regionKey = "INDUSTRIAL_EAST",
+                parSeconds = 760, enemySquadPairs = 4, alertBias = 0.55f, intelObjectiveWeight = 1.0,
+                objectiveSummary = new[] { "Primary: sabotage the pump station", "Secondary: deny the trench to the reaction force", "Hidden: leave no digital badge logs" }
+            },
+            new MissionTemplate
+            {
+                id = "DESERT_CONVOY", title = "Fuel Convoy", regionKey = "DESERT_CHECKPOINT",
+                parSeconds = 900, enemySquadPairs = 4, alertBias = 0.45f, intelObjectiveWeight = 1.3,
+                objectiveSummary = new[] { "Primary: disable the lead technical", "Secondary: capture the fuel manifest", "Hidden: no convoy survivors reaching the well" }
+            },
+            new MissionTemplate
+            {
+                id = "SUBARCTIC_STOKER", title = "Boiler House", regionKey = "SUBARCTIC_COMPOUND",
+                parSeconds = 880, enemySquadPairs = 3, alertBias = 0.5f, intelObjectiveWeight = 1.15,
+                objectiveSummary = new[] { "Primary: silence the stoker detail", "Secondary: cut the grid for the comms mast", "Hidden: compound alarm never trips" }
+            },
+            new MissionTemplate
+            {
+                id = "VILLAGE_CHURCH", title = "Church Courtyard", regionKey = "FOREST_VILLAGE",
+                parSeconds = 700, enemySquadPairs = 3, alertBias = 0.35f, objectiveSummary = new[] { "Primary: clear the courtyard sentries", "Secondary: extract the priest intel", "Hidden: no shots inside the nave" },
+                intelObjectiveWeight = 1.35
             }
         };
 

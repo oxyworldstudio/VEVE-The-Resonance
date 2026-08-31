@@ -55,3 +55,5 @@
 *W5-W6 landed: retroactive prediction reconciliation (journal revokes optimistic XP) + authored biome scene profiles wired into the builder - 386/386.*
 
 *W7: unified debrief (rank+XP by owner+reconciler telemetry+biome alert floors) 389/389; round closed, deploy live.*
+
+*W8 content expansion: 15 authored operations (3/biome) exported to designer assets; content tests 15-count exact - 389/389.*

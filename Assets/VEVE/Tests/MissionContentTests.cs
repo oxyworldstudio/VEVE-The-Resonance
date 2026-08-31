@@ -7,9 +7,10 @@ using VEVE.WeaponCustomPro;
 public sealed class MissionContentTests
 {
     [Test]
-    public void CatalogHasUniqueIdsAndTwoPerRegion()
+    public void CatalogHasUniqueIdsAndThreePerRegion()
     {
         MissionTemplate[] all = MissionContentCatalog.All;
+        Assert.AreEqual(15, all.Length, "W8: 5 biomes x 3 authored ops");
         var ids = new HashSet<string>();
         var perRegion = new Dictionary<string, int>();
         foreach (MissionTemplate t in all)
@@ -19,7 +20,7 @@ public sealed class MissionContentTests
             perRegion[t.regionKey] = c + 1;
         }
         foreach (string r in MissionContentCatalog.Regions)
-            Assert.That(perRegion[r], Is.GreaterThanOrEqualTo(2), r);
+            Assert.That(perRegion[r], Is.EqualTo(3), r + " should have exactly three ops");
     }
 
     [Test]

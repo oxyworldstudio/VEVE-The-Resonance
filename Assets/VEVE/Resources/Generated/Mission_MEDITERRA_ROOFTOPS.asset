@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95fb88b23c4107843be204a0e628c77c, type: 3}
+  m_Name: Mission_MEDITERRA_ROOFTOPS
+  m_EditorClassIdentifier: VEVE.Runtime::VEVE.Content.CatalogItemAsset
+  kind: 0
+  id: MEDITERRA_ROOFTOPS
+  payload: 'id=MEDITERRA_ROOFTOPS
+
+    title=Rooftop Crossing
+
+    region=MEDIUM_TOWN
+
+    par=660
+
+    pairs=3
+
+    alert=0.3
+
+    intelw=1.15
+
+    objs=Primary:
+    clear the three-sided roof contact%7CSecondary: recover the courier satchel%7CHidden:
+    no rooftop entry witnessed
+
+'
