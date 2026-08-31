@@ -39,3 +39,5 @@
 *322/322 EditMode (C6b patrol model added); last doc-vs-code audit 2026-08-31.*
 
 *NGO transport installed: manifest 2.13.2, MissionTransportAdapter + explicit asmdef refs (autoReferenced does NOT cascade to asmdef assemblies) -> 329/329 EditMode green incl. all pre-existing suites.*
+
+*C4c landed: NetworkGameFlow (host/client/offline authority split, NotifyShot fact API, debrief mirror symmetry) -> 334/334 EditMode.*

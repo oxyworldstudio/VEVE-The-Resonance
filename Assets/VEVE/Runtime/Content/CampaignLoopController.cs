@@ -34,6 +34,13 @@ namespace VEVE.Content
         /// </summary>
         public System.Action<VEVE.Net.NetCommand> CommandSink;
 
+        /// <summary>
+        /// False on pure clients: every gameplay fact becomes a command ONLY (the
+        /// host journal owns sequence and the mirror owns replay); local session,
+        /// scoreboard and XP stay untouched by definition (client has none).
+        /// </summary>
+        public bool Authoritative = true;
+
         public MissionPhase Phase => session != null ? session.Phase : MissionPhase.Briefing;
         public MissionTemplate CurrentTemplate => session != null ? session.Template : default;
         public MissionSession CurrentSession => session;
@@ -50,14 +57,29 @@ namespace VEVE.Content
 
         private static string Normalize(string k) => k.Trim().ToUpperInvariant();
 
+        private bool busSubscribed;
+
+        private void Awake()
+        {
+            EnsureBus(true);
+        }
+
         private void OnEnable()
         {
-            VEVE.EventBus.SubscribeGlobal<ShotResolvedEvent>(OnShot);
+            EnsureBus(true);
         }
 
         private void OnDisable()
         {
-            VEVE.EventBus.UnsubscribeGlobal<ShotResolvedEvent>(OnShot);
+            EnsureBus(false);
+        }
+
+        private void EnsureBus(bool on)
+        {
+            if (on == busSubscribed) return;
+            busSubscribed = on;
+            if (on) VEVE.EventBus.SubscribeGlobal<ShotResolvedEvent>(OnShot);
+            else VEVE.EventBus.UnsubscribeGlobal<ShotResolvedEvent>(OnShot);
         }
 
         private void Start()
@@ -77,6 +99,8 @@ namespace VEVE.Content
         /// <summary>Drafts the next operation for a region (falls back to the default region).</summary>
         public MissionTemplate BeginNextMission(string regionKey = null)
         {
+            if (!Authoritative) return default; // drafts are a host-only prerogative
+
             string region = Normalize(string.IsNullOrEmpty(regionKey) ? defaultRegionKey : regionKey);
             int cycle = completedInRegion.TryGetValue(region, out int c) ? c : 0;
             MissionTemplate template = MissionScheduler.Draft(region, cycle);
@@ -140,57 +164,68 @@ namespace VEVE.Content
         private void OnShot(ShotResolvedEvent e)
         {
             if (e == null) return;
-            if (session != null && session.Phase == MissionPhase.Deployed)
+            ApplyShotFact(e.onTarget, e.civilianHarm);
+        }
+
+        /// <summary>Direct fact injection (host integrators / headless tests): one shot resolved.</summary>
+        public void NotifyShot(bool onTarget, bool civilianHarm = false)
+        {
+            ApplyShotFact(onTarget, civilianHarm);
+        }
+
+        private void ApplyShotFact(bool onTarget, bool civilianHarm)
+        {
+            if (Authoritative)
             {
-                session.RecordShot(e.onTarget, e.civilianHarm);
-                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.ShotFired,
-                    e.onTarget ? 1 : 0, e.civilianHarm ? 1 : 0));
+                if (session != null && session.Phase == MissionPhase.Deployed) session.RecordShot(onTarget, civilianHarm);
+                if (scoreboard != null)
+                {
+                    scoreboard.ReportShot(onTarget);
+                    if (civilianHarm) scoreboard.ReportCivilianHarm();
+                }
             }
-            if (scoreboard != null)
-            {
-                scoreboard.ReportShot(e.onTarget);
-                if (e.civilianHarm) scoreboard.ReportCivilianHarm();
-            }
+            CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.ShotFired,
+                onTarget ? 1 : 0, civilianHarm ? 1 : 0));
         }
 
         public void ReportIntelObject()
         {
-            if (session != null && session.Phase == MissionPhase.Deployed)
+            if (Authoritative)
             {
-                session.ReportIntelObject();
-                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.IntelObject));
+                if (session != null && session.Phase == MissionPhase.Deployed) session.ReportIntelObject();
+                if (scoreboard != null) scoreboard.ReportIntelObject();
             }
-            if (scoreboard != null) scoreboard.ReportIntelObject();
+            CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.IntelObject));
         }
 
         public void ReportContactHeld()
         {
-            if (session != null && session.Phase == MissionPhase.Deployed)
+            if (Authoritative)
             {
-                session.ReportContactHeld();
-                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.ContactHeld));
+                if (session != null && session.Phase == MissionPhase.Deployed) session.ReportContactHeld();
+                if (scoreboard != null) scoreboard.ReportContactHeld();
             }
-            if (scoreboard != null) scoreboard.ReportContactHeld();
+            CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.ContactHeld));
         }
 
         public void ReportMalfunction()
         {
-            if (session != null && session.Phase == MissionPhase.Deployed)
+            if (Authoritative)
             {
-                session.ReportMalfunction();
-                CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.Malfunction));
+                if (session != null && session.Phase == MissionPhase.Deployed) session.ReportMalfunction();
             }
+            CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.Malfunction));
         }
 
         public void SetSquadSize(int members)
         {
             int m = Math.Max(1, members);
-            if (session != null)
+            if (Authoritative)
             {
-                session.SetSquadTotal(m);
+                if (session != null) session.SetSquadTotal(m);
+                if (scoreboard != null) scoreboard.ReportSquadTotal(m);
                 CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.SquadTotalSet, m));
             }
-            if (scoreboard != null) scoreboard.ReportSquadTotal(m);
         }
 
         private int PostureToIntensity(string region)

@@ -186,7 +186,9 @@ namespace VEVE.Editor
             interfaceObject.AddComponent<VEVE.UI.Personalization.PersonalizationBinder>();
             interfaceObject.AddComponent<VEVE.UI.HudDiegesisController>();
             interfaceObject.AddComponent<VEVE.UI.ScopeReticleOverlay>();
+            interfaceObject.AddComponent<VEVE.UI.MissionDebriefView>();
             interfaceObject.AddComponent<VEVE.Comms.RadioDispatcher>();
+            interfaceObject.AddComponent<VEVE.Net.NetworkGameFlow>();
 
             GameObject dashboardObject = new GameObject("DebugDashboard");
             dashboardObject.AddComponent<VEVE.Diagnostics.DebugDashboardOverlay>();

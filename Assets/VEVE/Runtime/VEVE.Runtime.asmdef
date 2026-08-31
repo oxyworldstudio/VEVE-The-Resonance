@@ -1,7 +1,7 @@
 {
   "name": "VEVE.Runtime",
   "rootNamespace": "VEVE",
-  "references": [ "Unity.Netcode.Runtime" ],
+  "references": [ "Unity.Netcode.Runtime", "Unity.Networking.Transport" ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
