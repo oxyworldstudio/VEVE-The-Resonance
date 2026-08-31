@@ -45,3 +45,5 @@
 *C4d landed: NetworkedPlayerAvatar + NetworkTransform movement, PlayerController input authority (offline-safe rules) -> 338/338. AI scene elements remain host-authoritative; remote NPC replication = C4e.*
 
 *C4e landed: host-only AI brains replicated to remote clients via authored NetworkObjects+NetworkTransform (offline-safe rules) -> 342/342. Remaining: C7 pipeline + polish.*
+
+*Step D pipeline-prep: PipelineCompat (family-aware shader resolver, 3 tests) + migration playbook; URP 17.x NOT manifest-forced (public registry caps at 10.10.1) -> WebGL + 359/359 stay green; HDRP route documented as PC/console branch.*
