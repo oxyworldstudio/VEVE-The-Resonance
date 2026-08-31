@@ -71,7 +71,7 @@ namespace VEVE.Net
         {
             if (_instance != null && _instance != this) { Destroy(gameObject); return; }
             _instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (Application.isPlaying) DontDestroyOnLoad(gameObject); // editor tests: no DDOL
         }
 
         public bool StartHostSession(string listenAddress = "0.0.0.0")
@@ -103,18 +103,25 @@ namespace VEVE.Net
             ApplyAuthority();
         }
 
-        private void EnsureInfra(string address, ushort? port = null)
+        /// <summary>Idempotent infra build (NetworkManager + UnityTransport wired into
+        /// NetworkConfig + PlayerPrefab from Resources). Public: lobby tooling and
+        /// regression tests drive it directly (W-BUG-001 transport regression).</summary>
+        public void EnsureInfra(string address, ushort? port = null, NetworkManager existing = null)
         {
-            Manager = FindObjectOfType<NetworkManager>();
+            Manager = existing != null ? existing : FindObjectOfType<NetworkManager>();
             if (Manager == null)
             {
                 GameObject go = new GameObject("NetworkManager");
-                DontDestroyOnLoad(go);
+                if (Application.isPlaying) DontDestroyOnLoad(go); // illegal in edit mode
                 Manager = go.AddComponent<NetworkManager>();
             }
 
             UnityTransport transport = Manager.GetComponent<UnityTransport>();
             if (transport == null) transport = Manager.gameObject.AddComponent<UnityTransport>();
+            // NGO 2.13 BUGFIX (W-BUG-001): adding the component is NOT enough — the
+            // NetworkConfig must reference it, otherwise StartHost fails silently and
+            // the lobby stays static. Regression-tested in NetworkGameFlowInfraTests.
+            Manager.NetworkConfig.NetworkTransport = transport;
             transport.SetConnectionData(address, port ?? defaultPort);
 
             // C4f: per-connection pawns when the built asset is present.

@@ -85,10 +85,14 @@ namespace VEVE.Net
 
         // ------------------------------------------------------------ commands
 
+        /// <summary>Never silent: every failed action paints the reason on the lobby (W-BUG-001).</summary>
+        public bool LastActionFailed { get; private set; }
+
         public bool TryHost()
         {
-            if (backend == null || !SessionFlowRules.CanHost(State)) return false;
-            if (!backend.Host(lastHostAddress, lastHostPort)) return false;
+            if (backend == null || !SessionFlowRules.CanHost(State)) return Fail("cannot host now");
+            if (!backend.Host(lastHostAddress, lastHostPort)) return Fail("host start failed (transport)");
+            LastActionFailed = false;
             State = LobbyState.InSession;
             Refresh();
             return true;
@@ -96,13 +100,26 @@ namespace VEVE.Net
 
         public bool TryJoin(string address, ushort port)
         {
-            if (backend == null || !SessionFlowRules.CanJoin(State)) return false;
+            if (backend == null || !SessionFlowRules.CanJoin(State)) return Fail("cannot join now");
             lastHostAddress = address;
             lastHostPort = port;
-            if (!backend.Join(address, port)) { return false; }
+            if (!backend.Join(address, port)) return Fail("join refused by transport");
+            LastActionFailed = false;
             State = LobbyState.InSession;
             Refresh();
             return true;
+        }
+
+        bool Fail(string reason)
+        {
+            LastActionFailed = true;
+            if (statusText != null)
+            {
+                statusText.color = HudThemeLibrary.AlertRed;
+                statusText.text = "ERROR: " + reason;
+            }
+            Refresh();
+            return false;
         }
 
         public bool TryLeave()
