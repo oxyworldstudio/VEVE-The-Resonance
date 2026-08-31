@@ -180,6 +180,7 @@ namespace VEVE.Editor
             interfaceObject.AddComponent<VEVE.UI.MainMenuFlowController>();
             interfaceObject.AddComponent<VEVE.UI.Personalization.PersonalizationWorkspace>();
             interfaceObject.AddComponent<VEVE.UI.Personalization.PersonalizationBinder>();
+            interfaceObject.AddComponent<VEVE.UI.HudDiegesisController>();
 
             GameObject dashboardObject = new GameObject("DebugDashboard");
             dashboardObject.AddComponent<VEVE.Diagnostics.DebugDashboardOverlay>();
