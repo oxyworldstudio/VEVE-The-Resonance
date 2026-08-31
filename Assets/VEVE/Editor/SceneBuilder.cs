@@ -79,6 +79,11 @@ namespace VEVE.Editor
             player.AddComponent<Unity.Netcode.NetworkObject>();
             player.AddComponent<VEVE.Net.NetworkedPlayerAvatar>();
             player.AddComponent<Unity.Netcode.Components.NetworkTransform>();
+            {
+                SerializedObject avatarData = new SerializedObject(player.GetComponent<VEVE.Net.NetworkedPlayerAvatar>());
+                avatarData.FindProperty("sceneRig").boolValue = true;
+                avatarData.ApplyModifiedPropertiesWithoutUndo();
+            }
             
             SerializedObject coordinatorData = new SerializedObject(coordinator);
             coordinatorData.FindProperty("environment").objectReferenceValue = environmentSimulation;

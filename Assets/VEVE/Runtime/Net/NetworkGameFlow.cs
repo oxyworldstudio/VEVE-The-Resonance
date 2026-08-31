@@ -98,6 +98,13 @@ namespace VEVE.Net
             UnityTransport transport = Manager.GetComponent<UnityTransport>();
             if (transport == null) transport = Manager.gameObject.AddComponent<UnityTransport>();
             transport.SetConnectionData(address, port ?? defaultPort);
+
+            // C4f: per-connection pawns when the built asset is present.
+            GameObject pawn = UnityEngine.Resources.Load<GameObject>("Generated/RemotePlayer");
+            if (pawn != null)
+            {
+                Manager.NetworkConfig.PlayerPrefab = pawn;
+            }
         }
 
         private void ApplyAuthority()
