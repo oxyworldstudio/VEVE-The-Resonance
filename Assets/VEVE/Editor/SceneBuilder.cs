@@ -41,6 +41,7 @@ namespace VEVE.Editor
             GameObject simulation = new GameObject("SimulationCoordinator");
             SimulationCoordinator coordinator = simulation.AddComponent<SimulationCoordinator>();
             simulation.AddComponent<SimulationDiagnostics>();
+            simulation.AddComponent<VEVE.Scoring.MissionScoreBoard>();
             
             GameObject sunObject = new GameObject("Sun");
             Light sun = sunObject.AddComponent<Light>();
