@@ -41,6 +41,9 @@ namespace VEVE.Content
         /// </summary>
         public bool Authoritative = true;
 
+        /// <summary>W5 reconciler telemetry (confirmed/reverted/late) for debrief + debug overlay.</summary>
+        public readonly VEVE.Net.PredictionReconciler Reconciler = new VEVE.Net.PredictionReconciler();
+
         public MissionPhase Phase => session != null ? session.Phase : MissionPhase.Briefing;
         public MissionTemplate CurrentTemplate => session != null ? session.Template : default;
         public MissionSession CurrentSession => session;
@@ -181,8 +184,11 @@ namespace VEVE.Content
 
         private void ApplyShotFact(ShotResolvedEvent e)
         {
-            // lag-comp telemetry v1: journal fact reconciled against the shooter's local ring
-            VEVE.Net.LagCompRules.Reconcile(Weapon.Predictions, e.predictedOwner, e.predictedTick, e.onTarget);
+            // W5: retroactive authority - the journal truth revokes optimistic prediction XP
+            // grants. Session tallies stay the server's own raycast (never prediction-driven).
+            Reconciler.Reconcile(Weapon.Predictions, e.predictedOwner, e.predictedTick, e.onTarget,
+                VEVE.Catalog.FamilyXpLedger.Default, string.IsNullOrEmpty(e.family) ? "generic" : e.family,
+                VEVE.Catalog.FamilyXpLedger.XpPerHitOnTarget);
             bool onTarget = e.onTarget;
             bool civilianHarm = e.civilianHarm;
             if (Authoritative)

@@ -20,6 +20,7 @@ namespace VEVE.Content
         /// <summary>Local prediction metadata for reconciliation; -1 when server-side (no prediction to check).</summary>
         public int predictedTick = -1;
         public ulong predictedOwner;
+        public string family;
     }
 
     public enum MissionPhase { Briefing, Deployed, Debrief }

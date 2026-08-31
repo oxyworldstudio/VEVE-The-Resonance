@@ -51,3 +51,5 @@
 *Phase 2 (C4f-v2) landed: pawn-carried weapons (own optic fire line) + nearest-pawn AI acquisition (MultiTargetRules pure). Double-pass native: 362/362.*
 
 *Windows 1-4 completed: session UX, per-pawn XP, deterministic lag-comp telemetry, procedural art pass - 379/379 green.*
+
+*W5-W6 landed: retroactive prediction reconciliation (journal revokes optimistic XP) + authored biome scene profiles wired into the builder - 386/386.*

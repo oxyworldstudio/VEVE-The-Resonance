@@ -52,11 +52,25 @@ namespace VEVE.Catalog
             return xpByKey.TryGetValue(Key(clientId, family), out double v) ? v : 0d;
         }
 
+        /// <summary>Authority reversal: remove up to <paramref name="amount"/> credit (clamped at 0).
+        /// Offline owner id 0 and negative amounts cannot revoke anything.</summary>
+        public void Revoke(ulong clientId, string family, double amount)
+        {
+            if (!ClaimedGrant(clientId, family)) return;
+            if (double.IsNaN(amount) || amount <= 0) return;
+            string key = Key(clientId, family);
+            if (!xpByKey.TryGetValue(key, out double cur)) return;
+            double clamped = amount > MaxRevoke ? MaxRevoke : amount;
+            if (clamped > cur) clamped = cur;
+            xpByKey[key] = cur - clamped;
+        }
+
         public int Skill(ulong clientId, string family) => VEVE.Catalog.WeaponProficiencyMath.SkillFromXp((int)Math.Round(Xp(clientId, family), MidpointRounding.AwayFromZero));
 
         // single-entry and session caps: one event never smuggles unlimited xp, totals bounded
         public const double XpPerHitOnTarget = 6d;
         public const double MaxGrant = 240d;
+        public const double MaxRevoke = 480d;
         public const double CeilingTotal = 2000000d;
 
         public string Export()

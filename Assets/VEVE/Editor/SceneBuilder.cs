@@ -36,6 +36,7 @@ namespace VEVE.Editor
             
             GameObject environment = new GameObject("EnvironmentSimulation");
             EnvironmentSimulation environmentSimulation = environment.AddComponent<EnvironmentSimulation>();
+            VEVE.Content.BiomeSceneProfiles.ApplyDefault(environmentSimulation);
             environment.AddComponent<MissionRuntime>();
             
             GameObject simulation = new GameObject("SimulationCoordinator");

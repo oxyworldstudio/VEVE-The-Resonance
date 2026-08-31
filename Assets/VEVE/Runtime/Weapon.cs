@@ -321,7 +321,8 @@ namespace VEVE
                 onTarget = onTarget,
                 civilianHarm = civilianHarm,
                 predictedTick = predictedTick,
-                predictedOwner = owner
+                predictedOwner = owner,
+                family = predictedFamily
             });
         }
 
@@ -329,11 +330,13 @@ namespace VEVE
         public static readonly VEVE.Net.ShotReplayWindow Predictions = new VEVE.Net.ShotReplayWindow(192);
         private int predictedTick;
         private ulong owner;
+        private string predictedFamily;
 
         private void RecordPrediction(bool hit)
         {
             owner = OwnerClientId != 0 ? OwnerClientId : VEVE.Net.LagCompRules.OfflineOwner;
             predictedTick = Time.frameCount;
+            predictedFamily = FamilyKey;
             if (OwnerClientId == 0) return; // offline host: reconciliation is a session concern
             Predictions.Mark(new VEVE.Net.ShotPrediction
             {
