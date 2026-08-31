@@ -80,6 +80,21 @@ namespace VEVE.Content
             return false;
         }
 
+        /// <summary>0..4 insert alert floor a biome profile enforces on escalation posture.</summary>
+        public static bool TryAlertFloor(string biomeKey, out int alertFloor)
+        {
+            alertFloor = 0;
+            return TryGet(biomeKey, out var p) && TryAlertFloor(p, out alertFloor);
+        }
+
+        public static bool TryAlertFloor(in BiomeSceneProfile p, out int alertFloor)
+        {
+            float v = p.alertPostureBase01 * 4f;
+            if (v < 0f) { alertFloor = 0; return false; }
+            alertFloor = v > 4f ? 4 : (int)Math.Round(v);
+            return true;
+        }
+
         /// <summary>Null-safe weather baseline application; setter clamping lives on the sim.</summary>
         public static void ApplyTo(VEVE.EnvironmentSimulation sim, in BiomeSceneProfile p)
         {

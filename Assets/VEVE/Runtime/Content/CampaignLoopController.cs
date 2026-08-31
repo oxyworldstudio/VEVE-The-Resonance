@@ -106,11 +106,12 @@ namespace VEVE.Content
 
             string region = Normalize(string.IsNullOrEmpty(regionKey) ? defaultRegionKey : regionKey);
             int cycle = completedInRegion.TryGetValue(region, out int c) ? c : 0;
-            // C7: designer Resources pool preferred, code catalog is the guaranteed fallback
             MissionTemplate template = MissionScheduler.Draft(region, cycle, MissionCatalogSource.Resolve());
 
             session = new MissionSession(template, difficulty);
             int alert = PostureToIntensity(region);
+            if (BiomeSceneProfiles.TryAlertFloor(template.regionKey, out int floor) && floor > alert)
+                alert = floor;
             session.SetAlertAtInsert(alert);
             session.Deploy();
             publish(MissionPhase.Deployed, template.id);
@@ -151,6 +152,21 @@ namespace VEVE.Content
             {
                 progressionManager.AddExperience(breakdown.experienceReward);
             }
+
+            // W7: assemble the unified debrief (presentation-only; journal truth unchanged)
+            var owners = new System.Collections.Generic.List<ulong>();
+            foreach (var p in VEVE.Net.NetworkedPlayerPawn.Active)
+                if (p != null) owners.Add(p.OwnerClientId);
+            string lightingKey = "WarmLowSun";
+            if (BiomeSceneProfiles.TryGet(session.Template.regionKey, out var biome)) lightingKey = biome.lightingKey;
+            VEVE.UI.DebriefModel.Apply(new VEVE.UI.DebriefData
+            {
+                headline = session.Template.title ?? session.Template.id,
+                score = breakdown,
+                ownerLines = VEVE.UI.DebriefModel.OwnerLines(VEVE.Catalog.FamilyXpLedger.Default, owners, null),
+                reconcileTelemetry = Reconciler.Telemetry,
+                biomeBiomeLightingKey = lightingKey
+            });
 
             publish(MissionPhase.Debrief, session.Template.id);
             VEVE.EventBus.PublishGlobal(new MissionScoredEvent

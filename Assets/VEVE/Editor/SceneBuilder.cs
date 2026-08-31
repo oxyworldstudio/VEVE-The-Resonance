@@ -202,6 +202,7 @@ namespace VEVE.Editor
             interfaceObject.AddComponent<VEVE.UI.ScopeReticleOverlay>();
             interfaceObject.AddComponent<VEVE.UI.MissionDebriefView>();
             interfaceObject.AddComponent<VEVE.Comms.RadioDispatcher>();
+            interfaceObject.AddComponent<VEVE.UI.DebriefPanel>();
             interfaceObject.AddComponent<VEVE.Net.NetworkGameFlow>();
 
             GameObject dashboardObject = new GameObject("DebugDashboard");

@@ -53,3 +53,5 @@
 *Windows 1-4 completed: session UX, per-pawn XP, deterministic lag-comp telemetry, procedural art pass - 379/379 green.*
 
 *W5-W6 landed: retroactive prediction reconciliation (journal revokes optimistic XP) + authored biome scene profiles wired into the builder - 386/386.*
+
+*W7: unified debrief (rank+XP by owner+reconciler telemetry+biome alert floors) 389/389; round closed, deploy live.*
