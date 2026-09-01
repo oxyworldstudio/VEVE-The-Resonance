@@ -67,3 +67,5 @@
 *CODE REVIEW SYSTEM live: agent pipeline (SelfCancel/Lifecycle/FloatAssert) + Orchestrator gate-mode + Editor menu; 411/411, self-scan 0 blockers.*
 
 *Roadmap F0 started: AAA_TECHNICAL_ROADMAP_CORE_GAMEPLAY + SimDataPack/hash sealed pack + ParityHarness + CR-DAT/CR-DET agents (5 specialists). 416/416, self-scan 0.*
+
+*Round G in flight: 4 graphics agents (texture fidelity tiers+AO+biome variation, procedural sky, built-in post stack, decal pool) - orchestrator gates on return.*
