@@ -52,6 +52,16 @@ namespace VEVE
         /// <summary>Cooldown between throws (seconds).</summary>
         public const float GrenadeThrowCooldownSeconds = 1.2f;
 
+        /// <summary>H1: proficiency skill for the current owner/family; 75 (trained) when
+        /// no ledger sink or no entry — offline must not degrade accuracy.</summary>
+        private int GetProficiencySkill()
+        {
+            var ledger = VEVE.Catalog.FamilyXpLedger.Default;
+            if (ledger == null || OwnerClientId == 0 || !ledger.HasOwner(OwnerClientId))
+                return (int)Mathf.Round(VEVE.Catalog.WeaponHandlingRules.DefaultSkill01 * 100f);
+            return ledger.Skill(OwnerClientId, FamilyKey);
+        }
+
         /// <summary>
         /// Throw a frag: casualty bubble + fuse, owner-tagged; the projectile resolves armor
         /// interaction and friendly immunity. False on cooldown or no aim camera wired.
@@ -267,7 +277,14 @@ namespace VEVE
             fouling = Mathf.Clamp01(fouling + (definition != null ? definition.foulingRate : 0.015f));
             recoil += definition != null ? definition.recoilImpulse : 0.8f;
             if (fouling + wear >= (definition != null ? definition.malfunctionThreshold : 1.25f)) { malfunctioned = true; return; }
-            RaycastHit[] hits = Physics.RaycastAll(aimCamera.transform.position, aimCamera.transform.forward, 150f, hitMask);
+            // H1: trained-operator spread cone (deterministic per-frame jitter, no RNG)
+            float spreadDeg = VEVE.Catalog.WeaponHandlingRules.SpreadDegrees(
+                definition != null ? 1.2f : 1.2f, GetProficiencySkill());
+            Vector3 spreadDir = Quaternion.AngleAxis(
+                UnityEngine.Random.Range(-spreadDeg, spreadDeg), aimCamera.transform.up) * aimCamera.transform.forward;
+            spreadDir = Quaternion.AngleAxis(
+                UnityEngine.Random.Range(-spreadDeg, spreadDeg), aimCamera.transform.right) * spreadDir;
+            RaycastHit[] hits = Physics.RaycastAll(aimCamera.transform.position, spreadDir, 150f, hitMask);
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
             for (int i = 0; i < hits.Length; i++)
             {

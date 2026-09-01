@@ -71,3 +71,5 @@
 *Round G in flight: 4 graphics agents (texture fidelity tiers+AO+biome variation, procedural sky, built-in post stack, decal pool) - orchestrator gates on return.*
 
 *Round G shipped: texture fidelity tiers+AO+biome variation, procedural sky/atmosphere, built-in post stack (TacticalPost), pooled surface decals - 500/500, self-scan 0.*
+
+*H1-H4 landed: spread-proficiency link, AI grenade thrower, progression persistence, debrief visibility fix - 505/505.*

@@ -34,6 +34,17 @@ namespace VEVE.Catalog
 
         public int Count => xpByKey.Count;
 
+        /// <summary>True when the client has at least one credited family entry.</summary>
+        public bool HasOwner(ulong clientId)
+        {
+            if (clientId == OfflineOwner) return false;
+            foreach (var kv in xpByKey)
+            {
+                if (kv.Key.StartsWith(clientId + "|", StringComparison.Ordinal)) return true;
+            }
+            return false;
+        }
+
         public bool ClaimedGrant(ulong clientId, string family) => clientId != OfflineOwner && !string.IsNullOrEmpty(family);
 
         public void Grant(ulong clientId, string family, double amount)

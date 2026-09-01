@@ -34,6 +34,9 @@ namespace VEVE.Content
         /// </summary>
         public System.Action<VEVE.Net.NetCommand> CommandSink;
 
+        /// <summary>H3: key-value persistence seam (PlayerPrefs in production, dictionary in tests).</summary>
+        public VEVE.Content.IKeyValueStore PersistenceStore;
+
         /// <summary>
         /// False on pure clients: every gameplay fact becomes a command ONLY (the
         /// host journal owns sequence and the mirror owns replay); local session,
@@ -93,6 +96,10 @@ namespace VEVE.Content
             {
                 string callsign = campaign != null && campaign.ActiveOperator != null ? campaign.ActiveOperator.callsign : "VEVE-01";
                 progressionManager = new VEVE.Progression.ProgressionManager(callsign, callsign);
+            }
+            if (PersistenceStore != null && VEVE.Catalog.FamilyXpLedger.Default != null)
+            {
+                VEVE.Content.ProgressionPersistence.Load(VEVE.Catalog.FamilyXpLedger.Default, PersistenceStore);
             }
             SetSquadSize(1);
         }
@@ -176,6 +183,11 @@ namespace VEVE.Content
             });
             CommandSink?.Invoke(VEVE.Net.MissionNetMap.Command(VEVE.Net.NetCommandType.MissionEnd,
                 success ? 1 : 0, 0, elapsedSeconds));
+            if (PersistenceStore != null)
+            {
+                VEVE.Content.ProgressionPersistence.Save(
+                    VEVE.Catalog.FamilyXpLedger.Default, PersistenceStore);
+            }
             return breakdown;
         }
 
