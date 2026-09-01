@@ -79,6 +79,9 @@ namespace VEVE.Editor
             player.AddComponent<VEVE.RealisticPhysics.TerminalVelocityFallingSystem>();
             player.AddComponent<VEVE.Gear.DamageableGearAdapter>();
             player.AddComponent<VEVE.Operators.OperatorInstance>();
+            player.AddComponent<VEVE.Net.NetworkedPlayerAvatar>();
+            var playerWeapon = player.AddComponent<Weapon>();
+            playerWeapon.IsPlayerControlled = true;
             player.AddComponent<Unity.Netcode.NetworkObject>();
             player.AddComponent<VEVE.Net.NetworkedPlayerAvatar>();
             player.AddComponent<Unity.Netcode.Components.NetworkTransform>();
@@ -134,6 +137,9 @@ namespace VEVE.Editor
             enemy.GetComponent<Renderer>().sharedMaterial = concrete;
             Damageable damageable = enemy.AddComponent<Damageable>();
             enemy.AddComponent<VEVE.Gear.DamageableGearAdapter>();
+            // W-BUG-002: enemy weapon must never react to player input
+            var enemyWeapon = enemy.AddComponent<Weapon>();
+            enemyWeapon.IsPlayerControlled = false;
 
             GameObject doorObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
             doorObject.name = "BarricadedDoor";

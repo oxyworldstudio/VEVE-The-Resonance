@@ -75,3 +75,5 @@
 *H1-H4 landed: spread-proficiency link, AI grenade thrower, progression persistence, debrief visibility fix - 505/505.*
 
 *W15: grenade inventory rules (finite, restock never reduces) + GrenadeHudPanel event-driven counter - 510/510.*
+
+*Gameplay integration closed: player rig weapon + enemy AI weapon isolation (W-BUG-002 dual-fire fix), 542/542 double pass.*

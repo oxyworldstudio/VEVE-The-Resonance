@@ -49,6 +49,8 @@ namespace VEVE
         [Tooltip("Total blast energy for grenades thrown from this weapon (J).")]
         [SerializeField] private float grenadeEnergyJ = 230f;
         [SerializeField, Min(0)] private int grenadeCount = VEVE.Combat.GrenadeInventoryRules.MaxPerMission;
+        [Tooltip("Base cone half-angle in degrees before the owner's proficiency scaling (H1/W-H5).")]
+        [SerializeField] private float baseSpreadDeg = 1.2f;
 
         /// <summary>Frag grenades left (W15: finite, decremented on throw).</summary>
         public int GrenadesRemaining => grenadeCount;
@@ -82,6 +84,13 @@ namespace VEVE
                 return (int)Mathf.Round(VEVE.Catalog.WeaponHandlingRules.DefaultSkill01 * 100f);
             return ledger.Skill(OwnerClientId, FamilyKey);
         }
+
+        /// <summary>W-H5: fired once per spent round (after the shot is committed), so the
+        /// stamina rig can charge sprint-equivalent effort per shot.</summary>
+        public event System.Action ShotFired;
+
+        /// <summary>Stamina rig gate (W-H5); null when no <see cref="VEVE.Combat.StaminaWeaponBridge"/> is on the rig.</summary>
+        private VEVE.Combat.StaminaWeaponBridge staminaBridge;
 
         /// <summary>
         /// Throw a frag: casualty bubble + fuse, owner-tagged; the projectile resolves armor
@@ -141,6 +150,7 @@ namespace VEVE
             rounds = magazineSize;
             reserveRounds = VEVE.Combat.AmmunitionModel.StartReserve(magazineSize);
             maintenance = GetComponent<Maintenance>();
+            staminaBridge = GetComponent<VEVE.Combat.StaminaWeaponBridge>();
             @operator = GetComponentInParent<VEVE.Operators.OperatorInstance>();
             if (@operator != null && identity == null) identity = @operator.Identity;
             ResolveRangeCard();
@@ -230,6 +240,7 @@ namespace VEVE
             {
                 // Finish the reload: transfer was already applied at request time.
             }
+            if (!IsPlayerControlled) return; // AI weapons: no player input path (W-BUG-002)
             if (Input.GetKeyDown(KeyCode.R) && !wasReloading) BeginFullReload();
             if (Input.GetKeyDown(KeyCode.T) && !wasReloading) BeginTacticalReload();
             if (Input.GetKeyDown(KeyCode.G) && Time.unscaledTime >= nextGrenade) TryThrowGrenade();
@@ -289,6 +300,8 @@ namespace VEVE
         private void Fire()
         {
             if (rounds <= 0) return;
+            if (staminaBridge != null && staminaBridge.FireBlockedByExhaustion) return;
+            if (aimCamera == null) aimCamera = Camera.main; // unauthored rig: main camera fallback (single-player)
             if (aimCamera == null)
             {
                 Debug.LogError("Weapon requires an aim camera.", this);
@@ -296,18 +309,18 @@ namespace VEVE
             }
             rounds--;
             nextShot = Time.time + fireRate;
+            ShotFired?.Invoke();
             TacticalSound.Emit(transform.position, 35f);
             if (maintenance != null) maintenance.UseShot();
             fouling = Mathf.Clamp01(fouling + (definition != null ? definition.foulingRate : 0.015f));
             recoil += definition != null ? definition.recoilImpulse : 0.8f;
             if (fouling + wear >= (definition != null ? definition.malfunctionThreshold : 1.25f)) { malfunctioned = true; return; }
             // H1: trained-operator spread cone (deterministic per-frame jitter, no RNG)
-            float spreadDeg = VEVE.Catalog.WeaponHandlingRules.SpreadDegrees(
-                definition != null ? 1.2f : 1.2f, GetProficiencySkill());
+            float spread = VEVE.Catalog.WeaponHandlingRules.SpreadDegrees(baseSpreadDeg, GetProficiencySkill());
             Vector3 spreadDir = Quaternion.AngleAxis(
-                UnityEngine.Random.Range(-spreadDeg, spreadDeg), aimCamera.transform.up) * aimCamera.transform.forward;
+                UnityEngine.Random.Range(-spread, spread), aimCamera.transform.up) * aimCamera.transform.forward;
             spreadDir = Quaternion.AngleAxis(
-                UnityEngine.Random.Range(-spreadDeg, spreadDeg), aimCamera.transform.right) * spreadDir;
+                UnityEngine.Random.Range(-spread, spread), aimCamera.transform.right) * spreadDir;
             RaycastHit[] hits = Physics.RaycastAll(aimCamera.transform.position, spreadDir, 150f, hitMask);
             System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
             for (int i = 0; i < hits.Length; i++)
@@ -451,6 +464,8 @@ namespace VEVE
         public float SightHeightMeters => definition != null ? definition.sightHeight : 0f;
         /// <summary>Session owner for proficiency attribution; 0 when offline/unowned so single-player never bypasses the existing progression pipeline.</summary>
         public ulong OwnerClientId { get; set; }
+        /// <summary>False on AI-controlled weapons: Update skips player input handling entirely (W-BUG-002 dual-fire fix, mirrors GrenadeProjectile friendly immunity).</summary>
+        public bool IsPlayerControlled = true;
         /// <summary>
         /// Family attribution key: definition name normalized, else catalog id / generic. Stable
         /// with the proficiency system family string contract (lowercase platform/weapon name).

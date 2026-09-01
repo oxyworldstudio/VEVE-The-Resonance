@@ -68,6 +68,21 @@ namespace VEVE
 
         private void Awake()
         {
+            EnsureStateInitialized();
+            physiology = GetComponent<Physiology>();
+            movement = GetComponent<MovementSimulation>();
+            playerController = GetComponent<PlayerController>();
+        }
+
+        /// <summary>
+        /// Builds the physiological state from the serialized configuration when it has not
+        /// been built yet (Awake on a live rig; lazily for edit-time tooling and tests so
+        /// readouts on a fresh component reflect a full tank instead of a zeroed struct).
+        /// No-op once <see cref="StaminaState.maxStamina"/> is positive.
+        /// </summary>
+        private void EnsureStateInitialized()
+        {
+            if (staminaState.maxStamina > 0f) return;
             staminaState = new StaminaState
             {
                 currentStamina = maxStamina,
@@ -82,9 +97,6 @@ namespace VEVE
                 recoveryRate = baseRecoveryRate,
                 glycogenReserve = 100f
             };
-            physiology = GetComponent<Physiology>();
-            movement = GetComponent<MovementSimulation>();
-            playerController = GetComponent<PlayerController>();
         }
 
         /// <summary>
@@ -167,9 +179,17 @@ namespace VEVE
         }
 
         /// <summary>
-        /// Gets the current stamina percentage.
+        /// Gets the current stamina percentage. Lazily initializes the state so a fresh
+        /// (not yet Awoken) component reports a full tank instead of NaN.
         /// </summary>
-        public float StaminaPercentage => staminaState.currentStamina / staminaState.maxStamina;
+        public float StaminaPercentage
+        {
+            get
+            {
+                EnsureStateInitialized();
+                return staminaState.currentStamina / staminaState.maxStamina;
+            }
+        }
 
         /// <summary>
         /// Gets whether the character is currently in aerobic state.
@@ -231,6 +251,68 @@ namespace VEVE
             if (percentage > 0.5f) return 1f;
             if (percentage > 0.2f) return 0.7f;
             return 0.4f;
+        }
+
+        /// <summary>Sprint speed multiplier floor (W-H5): an empty tank still allows 40% sprint speed.</summary>
+        public const float SprintSpeedFloor = 0.4f;
+
+        /// <summary>
+        /// W-H5: stamina-gated sprint speed. Monotonic in stamina — a full tank yields 1
+        /// and an empty tank bottoms out at <see cref="SprintSpeedFloor"/>; deterministic
+        /// linear mapping with no hysteresis.
+        /// </summary>
+        public float SprintSpeedMultiplier
+        {
+            get
+            {
+                float percentage = StaminaPercentage;
+                if (float.IsNaN(percentage)) return SprintSpeedFloor;
+                return Mathf.Lerp(SprintSpeedFloor, 1f, Mathf.Clamp01(percentage));
+            }
+        }
+
+        /// <summary>
+        /// W-H5: drains sprint-equivalent effort over an explicit <paramref name="dt"/>
+        /// (seconds). Mirrors the sprint branch of <see cref="ConsumeStamina"/> — same rates,
+        /// thresholds, lactate/oxygen-debt/glycogen side effects — but takes dt as a
+        /// parameter instead of <see cref="Time.deltaTime"/> so per-shot costs and offline
+        /// simulation stay deterministic. Fires <see cref="OnStaminaChanged"/> and
+        /// <see cref="OnSprintExhausted"/> like any sprint spend; no-op at dt &lt;= 0 or
+        /// on an already-empty tank.
+        /// </summary>
+        public void DrainSprint(float dt)
+        {
+            EnsureStateInitialized();
+            if (dt <= 0f) return;
+            if (staminaState.currentStamina <= 0f) return;
+            float rate = sprintConsumptionRate;
+            staminaState.currentStamina = Mathf.Max(0f, staminaState.currentStamina - rate * dt);
+            timeSinceLastExertion = 0f;
+            if (staminaState.currentStamina < staminaState.aerobicThreshold)
+            {
+                staminaState.isAerobic = true;
+                staminaState.isAnaerobic = true;
+                staminaState.lactateLevel += lactateAccumulationRate * dt;
+                staminaState.oxygenDebt += rate * dt * 0.5f;
+            }
+            else if (staminaState.currentStamina < staminaState.anaerobicThreshold)
+            {
+                staminaState.isAerobic = true;
+                staminaState.isAnaerobic = false;
+                staminaState.lactateLevel = Mathf.Max(0f, staminaState.lactateLevel - lactateDecayRate * dt);
+            }
+            else
+            {
+                staminaState.isAerobic = false;
+                staminaState.isAnaerobic = false;
+                staminaState.lactateLevel = Mathf.Max(0f, staminaState.lactateLevel - lactateDecayRate * 2f * dt);
+            }
+            staminaState.glycogenReserve = Mathf.Max(0f, staminaState.glycogenReserve - rate * dt * 0.01f);
+            OnStaminaChanged?.Invoke(staminaState.currentStamina, staminaState.maxStamina);
+            if (staminaState.currentStamina <= 0f)
+            {
+                OnSprintExhausted?.Invoke(true);
+            }
         }
 
         /// <summary>
