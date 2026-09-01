@@ -37,6 +37,8 @@ namespace VEVE.Editor
             GameObject environment = new GameObject("EnvironmentSimulation");
             EnvironmentSimulation environmentSimulation = environment.AddComponent<EnvironmentSimulation>();
             VEVE.Content.BiomeSceneProfiles.ApplyDefault(environmentSimulation);
+            environment.AddComponent<VEVE.Graphics.ProceduralSkyController>();
+            environment.AddComponent<VEVE.Graphics.AtmosphereTintBridge>();
             environment.AddComponent<MissionRuntime>();
             
             GameObject simulation = new GameObject("SimulationCoordinator");
@@ -211,6 +213,9 @@ namespace VEVE.Editor
             sessionRoot.AddComponent<VEVE.Net.SessionLobbyPanel>();
             sessionRoot.AddComponent<VEVE.UI.LobbyRosterPanel>();
             interfaceObject.AddComponent<VEVE.Net.NetworkGameFlow>();
+            interfaceObject.AddComponent<VEVE.Graphics.TacticalPostController>();
+            interfaceObject.AddComponent<VEVE.VFX.SurfaceDecalPool>();
+            interfaceObject.AddComponent<VEVE.Graphics.SurfaceStyleDriver>();
 
             GameObject dashboardObject = new GameObject("DebugDashboard");
             dashboardObject.AddComponent<VEVE.Diagnostics.DebugDashboardOverlay>();

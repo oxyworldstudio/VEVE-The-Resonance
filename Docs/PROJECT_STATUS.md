@@ -69,3 +69,5 @@
 *Roadmap F0 started: AAA_TECHNICAL_ROADMAP_CORE_GAMEPLAY + SimDataPack/hash sealed pack + ParityHarness + CR-DAT/CR-DET agents (5 specialists). 416/416, self-scan 0.*
 
 *Round G in flight: 4 graphics agents (texture fidelity tiers+AO+biome variation, procedural sky, built-in post stack, decal pool) - orchestrator gates on return.*
+
+*Round G shipped: texture fidelity tiers+AO+biome variation, procedural sky/atmosphere, built-in post stack (TacticalPost), pooled surface decals - 500/500, self-scan 0.*

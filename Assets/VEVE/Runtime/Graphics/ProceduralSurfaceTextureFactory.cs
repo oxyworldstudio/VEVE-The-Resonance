@@ -191,6 +191,30 @@ namespace VEVE.Graphics
         [SerializeField, Range(256, 2048)] private int resolution = 1024;
         [SerializeField] private float frameBudgetMilliseconds = 2f;
 
+        /// <summary>G1: optional biome seed — combined with masterSeed in generated variation.</summary>
+        private int variationSeed;
+        /// <summary>G1: optional biome key driving per-biome surface variation.</summary>
+        private string variationBiomeKey = string.Empty;
+
+        /// <summary>G1: quality tier for generated texture resolution (power-of-two normalized).</summary>
+        public void SetQualityTier(int sidePixels)
+        {
+            int normalized = VEVE.Graphics.TextureQualityRules.NormalizeSide(sidePixels);
+            resolution = normalized;
+        }
+
+        public int GetQualityTierSide() => resolution;
+
+        /// <summary>G1: per-biome variation seed (deterministic surface color drift).</summary>
+        public void SetVariationSeed(int seed) { variationSeed = seed; }
+
+        public int GetVariationSeed() => variationSeed;
+
+        /// <summary>G1: per-biome variation key (drives SurfaceVariationRules multipliers on regen).</summary>
+        public void SetVariationBiome(string biomeKey) { variationBiomeKey = biomeKey ?? string.Empty; }
+
+        public string GetVariationBiome() => variationBiomeKey;
+
         private enum Stage
         {
             HeightRows = 0,
@@ -324,6 +348,28 @@ namespace VEVE.Graphics
             {
                 Enqueue(kind);
             }
+        }
+
+        /// <summary>G1: queues all kinds with a per-biome variation key — regeneration applies
+        /// deterministic hue/sat/val/rough drift from <see cref="VEVE.Graphics.SurfaceVariationRules"/>.</summary>
+        public void EnqueueAll(string biomeKey)
+        {
+            variationBiomeKey = biomeKey ?? string.Empty;
+            EnqueueAll();
+        }
+
+        /// <summary>G1: resolves the tinted albedo/roughness for a kind under the active biome variation
+        /// (no-op when no variation biome is set). Pure math, safe in EditMode.</summary>
+        public Color ApplyVariationTo(Color baseColor, string surfaceKindName)
+        {
+            if (string.IsNullOrEmpty(variationBiomeKey)) return baseColor;
+            return VEVE.Graphics.SurfaceVariationRules.ApplyVariation(baseColor, variationBiomeKey, surfaceKindName);
+        }
+
+        public float ApplyRoughVariationTo(float baseGloss, string surfaceKindName)
+        {
+            if (string.IsNullOrEmpty(variationBiomeKey)) return baseGloss;
+            return VEVE.Graphics.SurfaceVariationRules.ApplyRoughVariation(baseGloss, variationBiomeKey, surfaceKindName);
         }
 
         /// <summary>
