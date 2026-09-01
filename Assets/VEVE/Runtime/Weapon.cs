@@ -48,6 +48,27 @@ namespace VEVE
         [SerializeField] private float grenadeRadiusM = 8f;
         [Tooltip("Total blast energy for grenades thrown from this weapon (J).")]
         [SerializeField] private float grenadeEnergyJ = 230f;
+        [SerializeField, Min(0)] private int grenadeCount = VEVE.Combat.GrenadeInventoryRules.MaxPerMission;
+
+        /// <summary>Frag grenades left (W15: finite, decremented on throw).</summary>
+        public int GrenadesRemaining => grenadeCount;
+
+        /// <summary>Fired whenever the grenade count changes (HUD binding).</summary>
+        public event System.Action<int> GrenadesChanged;
+
+        /// <summary>Designer/server hook: set count and notify HUD listeners.</summary>
+        public void SetGrenadeCount(int value)
+        {
+            grenadeCount = Mathf.Max(0, value);
+            GrenadesChanged?.Invoke(grenadeCount);
+        }
+
+        /// <summary>Restock to the mission allowance (ammo crate interaction).</summary>
+        public void RestockGrenades()
+        {
+            grenadeCount = VEVE.Combat.GrenadeInventoryRules.Restock(grenadeCount, VEVE.Combat.GrenadeInventoryRules.MaxPerMission);
+            GrenadesChanged?.Invoke(grenadeCount);
+        }
 
         /// <summary>Cooldown between throws (seconds).</summary>
         public const float GrenadeThrowCooldownSeconds = 1.2f;
@@ -69,8 +90,11 @@ namespace VEVE
         public bool TryThrowGrenade()
         {
             if (Time.unscaledTime < nextGrenade) return false;
+            if (!VEVE.Combat.GrenadeInventoryRules.CanThrow(grenadeCount)) return false;
             if (aimCamera == null) return false;
             nextGrenade = Time.unscaledTime + GrenadeThrowCooldownSeconds;
+            grenadeCount = VEVE.Combat.GrenadeInventoryRules.AfterThrow(grenadeCount);
+            GrenadesChanged?.Invoke(grenadeCount);
 
             GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             go.name = "Grenade";
